@@ -1,9 +1,4 @@
-Below is the **ready-to-use `.md` (Markdown) file content**.
-You can **copy–paste this into a file like `Entity_vs_DTO.md`** and upload it to **GitHub / notes / docs**.
 
----
-
-````md
 # Entity vs DTO (Detailed Comparison)
 
 This document provides a **detailed, exam-ready comparison** between **Entity** and **DTO (Data Transfer Object)**.  
@@ -13,25 +8,28 @@ It covers **definitions, layers, annotations, usage, responsibilities, data flow
 
 ## 📊 Entity vs DTO (Detailed Comparison Table)
 
-| Aspect | **Entity** | **DTO (Data Transfer Object)** |
-|------|------------|--------------------------------|
-| **What it is** | Java class that represents a **database table** | Java class used to **transfer data between layers** |
-| **Primary Purpose** | Persist data in database | Carry data safely between layers (especially API ↔ Service) |
-| **Architecture Type** | Persistence / Domain object | Transfer / API object |
-| **Layer Used In** | Persistence layer | Presentation & Service layers |
-| **Mapped To** | Database table | Client request / response |
-| **Who uses it** | JPA / Hibernate / Repository | Controller / Service |
-| **Database Mapping** | ✔ Yes | ❌ No |
-| **JPA Managed** | ✔ Yes | ❌ No |
-| **Lifecycle** | Long-lived (persistent) | Short-lived (request/response scoped) |
-| **Exposure to Client** | ❌ Should NOT be exposed | ✔ Designed to be exposed |
-| **Security** | May contain sensitive fields (passwords, keys) | Contains only required safe fields |
-| **Coupling** | Tightly coupled to DB schema | Loosely coupled to DB |
-| **Change Impact** | DB change affects Entity | DB change usually does NOT affect DTO |
-| **Validation** | Rarely used | Commonly used |
-| **Serialization (JSON)** | Not recommended directly | Designed for JSON / XML |
-| **Business Logic** | ❌ Should NOT contain | ❌ Should NOT contain |
-| **Conversion Needed** | Used directly by JPA | Converted ↔ Entity in Service layer |
+## 📊 Entity vs DTO (Detailed Comparison Table)
+
+| Aspect | Entity | DTO (Data Transfer Object) |
+|------|--------|----------------------------|
+| What it is | Java class that represents a database table | Java class used to transfer data between layers |
+| Primary Purpose | Persist data in database | Carry data safely between layers (API ↔ Service) |
+| Architecture Type | Persistence / Domain object | Transfer / API object |
+| Layer Used In | Persistence layer | Presentation & Service layers |
+| Mapped To | Database table | Client request / response |
+| Who uses it | JPA / Hibernate / Repository | Controller / Service |
+| Database Mapping | Yes | No |
+| JPA Managed | Yes | No |
+| Lifecycle | Long-lived (persistent) | Short-lived (request/response scoped) |
+| Exposure to Client | No (should not be exposed) | Yes (designed to be exposed) |
+| Security | May contain sensitive fields | Contains only required safe fields |
+| Coupling | Tightly coupled to DB schema | Loosely coupled to DB |
+| Change Impact | DB change affects Entity | DB change usually does not affect DTO |
+| Validation | Rarely used | Commonly used |
+| Serialization (JSON) | Not recommended directly | Designed for JSON / XML |
+| Business Logic | Should not contain | Should not contain |
+| Conversion Needed | Used directly by JPA | Converted ↔ Entity in Service layer |
+
 
 ---
 

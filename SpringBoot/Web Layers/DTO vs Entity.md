@@ -122,3 +122,5 @@ public class UserDTO {
 | Hard to maintain | Entity changes affect all layers |
 
 
+
+

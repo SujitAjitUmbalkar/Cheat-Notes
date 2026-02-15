@@ -2,6 +2,7 @@
 
 ---
 
+
 # 🏗️ MVC Architecture & Core Concepts
 
 | Main Topic | Layer / Responsibility | Annotations Used (1-line purpose) | Functions / Methods Used |

@@ -122,5 +122,7 @@ public class UserDTO {
 | Hard to maintain | Entity changes affect all layers |
 
 
+![create-soft-link](https://github.com/user-attachments/assets/38358b2c-d5e6-4670-9f9d-66840fce49c1)
+
 
 

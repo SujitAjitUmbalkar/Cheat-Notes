@@ -8,8 +8,6 @@ It covers **definitions, layers, annotations, usage, responsibilities, data flow
 
 ## 📊 Entity vs DTO (Detailed Comparison Table)
 
-## 📊 Entity vs DTO (Detailed Comparison Table)
-
 | Aspect | Entity | DTO (Data Transfer Object) |
 |------|--------|----------------------------|
 | What it is | Java class that represents a database table | Java class used to transfer data between layers |

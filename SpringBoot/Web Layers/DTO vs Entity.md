@@ -28,8 +28,57 @@ It covers **definitions, layers, annotations, usage, responsibilities, data flow
 | Business Logic | Should not contain | Should not contain |
 | Conversion Needed | Used directly by JPA | Converted ↔ Entity in Service layer |
 
-
 ---
+
+### 🟩 DTO – Validation / JSON Annotations (Not compulsory , but you can use these annotations in DTO )
+
+| Annotation | Use / Purpose | Important Parameters |
+|------------|--------------|----------------------|
+| @NotNull | Field must not be null | message |
+| @NotEmpty | Must not be null and size > 0 (String, Collection, Map, Array) | message |
+| @NotBlank | String must not be null and must contain non-whitespace characters | message |
+| @Size | Validates size/length range | min, max, message |
+| @Min | Number must be ≥ given value | value, message |
+| @Max | Number must be ≤ given value | value, message |
+| @Email | Valid email format | regexp, message |
+| @Pattern | Must match given regex | regexp, message |
+| @Positive | Number must be > 0 | message |
+| @PositiveOrZero | Number must be ≥ 0 | message |
+| @Negative | Number must be < 0 | message |
+| @NegativeOrZero | Number must be ≤ 0 | message |
+| @Past | Date must be in the past | message |
+| @PastOrPresent | Date must be past or present | message |
+| @Future | Date must be in the future | message |
+| @FutureOrPresent | Date must be future or present | message |
+| @Digits | Controls number of integer & fraction digits | integer, fraction, message |
+| @DecimalMin | Decimal number must be ≥ value | value, inclusive, message |
+| @DecimalMax | Decimal number must be ≤ value | value, inclusive, message |
+| @AssertTrue | Boolean must be true | message |
+| @AssertFalse | Boolean must be false | message |
+| @Valid | Triggers validation on nested objects | (no parameters) |
+
+### Example: DTO
+
+```java
+public class UserDTO {
+
+    @NotBlank
+    private String name;
+
+    @Email
+    private String email;
+}
+```
+
+## 🚫 What Happens If You Skip DTO?
+
+| Problem          | Explanation                      |
+| ---------------- | -------------------------------- |
+| Security risk    | Sensitive fields get exposed     |
+| Tight coupling   | DB changes break API             |
+| Poor API design  | Unnecessary data sent            |
+| Hard to maintain | Entity changes affect all layers |
+
 
 ## 🧱 Annotations Used (Very Important)
 
@@ -46,6 +95,24 @@ It covers **definitions, layers, annotations, usage, responsibilities, data flow
 | `@ManyToOne` | Many-to-one relationship |
 | `@JoinColumn` | Foreign key mapping |
 
+### 🟦 Functions Used in @Table (it applies on whole table ) 
+
+| Belongs To | Annotation / Function | Brief Use |
+|------------|----------------------|------------|
+| — | @Table | Defines table-level configuration for an entity |
+| @Table | name() | Sets the database table name |
+| @Table | schema() | Sets the schema in which the table exists |
+| @Table | catalog() | Sets the database/catalog name , catalog(schema(table))) |
+| @Table | uniqueConstraints() | Holds one or more @UniqueConstraint annotations |
+| @Table | indexes() | Holds one or more @Index annotations |
+| @Table.uniqueConstraints() | @UniqueConstraint | Defines a composite unique constraint |
+| @UniqueConstraint | name() | Name of the unique constraint |
+| @UniqueConstraint | columnNames() | Columns that must be unique together |
+| @Table.indexes() | @Index | Defines an index for performance |
+| @Index | name() | Name of the index |
+| @Index | columnList() | Column(s) included in the index |
+| @Index | unique() | Whether the index enforces uniqueness |
+
 ### Example: Entity
 ```java
 @Entity
@@ -58,33 +125,8 @@ public class User {
 }
 ````
 
----
 
-### 🟩 DTO – Validation / JSON Annotations
-
-| Annotation      | Purpose                 |
-| --------------- | ----------------------- |
-| `@NotNull`      | Field must not be null  |
-| `@NotBlank`     | Field must not be empty |
-| `@Email`        | Email validation        |
-| `@Size`         | Field length constraint |
-| `@JsonProperty` | JSON field mapping      |
-| `@JsonIgnore`   | Exclude field from JSON |
-
-### Example: DTO
-
-```java
-public class UserDTO {
-
-    @NotBlank
-    private String name;
-
-    @Email
-    private String email;
-}
-```
-
----
+### Relation Between them 
 
 ## 🔁 Layer-wise Usage
 
@@ -109,17 +151,3 @@ public class UserDTO {
 | Controller → Client  | DTO         |
 
 ---
-
-## 🚫 What Happens If You Skip DTO?
-
-| Problem          | Explanation                      |
-| ---------------- | -------------------------------- |
-| Security risk    | Sensitive fields get exposed     |
-| Tight coupling   | DB changes break API             |
-| Poor API design  | Unnecessary data sent            |
-| Hard to maintain | Entity changes affect all layers |
-
-
-
-
-

@@ -1,4 +1,3 @@
-
 # Entity vs DTO (Detailed Comparison)
 
 This document provides a **detailed, exam-ready comparison** between **Entity** and **DTO (Data Transfer Object)**.  

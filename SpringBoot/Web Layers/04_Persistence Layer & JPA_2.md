@@ -249,7 +249,7 @@ public class H2ConsoleConfig {
         return servlet;
     }
 }
-
+```
 ---
 
 # 7️⃣ JPA Repository Interfaces

@@ -1,8 +1,6 @@
 # Presentation Layer (Controller Layer) – Spring Boot Notes 
 Covered Notes
-(Annotated Controllers , Request Mapping , Shortcut Annotations (Recommended) , Dynamic URL Handling ,  @RequestBody , Response Handling , Exception Handling , Data Validation 0 
-````md
-
+(Annotated Controllers , Request Mapping , Shortcut Annotations (Recommended) , Dynamic URL Handling ,  @RequestBody , Response Handling , Exception Handling , Data Validation
 
 ## 1️⃣ What is Presentation Layer?
 
@@ -98,52 +96,136 @@ Example:
 
 ## 5️⃣ Dynamic URL Handling
 
-### 1) @RequestParam
+Here are **short, clean Markdown-friendly notes** on `@PathVariable` and `@RequestParam` with their parameters 👇
 
-Used for query parameters.
+---
 
-Example:
+# 🟢 @PathVariable
 
-```
-/employees?id=123
-```
+## ✅ What It Does
 
-Used when:
+• Used to extract values from the **URL path**.
+• Binds URI template variables to method parameters.
+• Commonly used in REST APIs.
+• Value is part of the endpoint structure.
+• Mostly used with `GET`, `PUT`, `DELETE`.
 
-* Parameter is optional
-* Used for filtering
-* Used for sorting
-* Used for pagination
+---
 
-Example:
+## ✅ Syntax Example
 
 ```java
-@GetMapping("/employees")
-public Employee getEmployee(@RequestParam Long id) {
+@GetMapping("/users/{id}")
+public User getUser(@PathVariable Long id) {
+    return userService.getUser(id);
 }
 ```
 
-### 2) @PathVariable
-
-Used when parameter is essential part of URL.
-
-Example:
+URL:
 
 ```
-/employees/123
+/users/5
 ```
 
-Used when:
+Here → `5` is mapped to `id`.
 
-* Identifying a specific resource
+---
 
-Example:
+## ✅ Parameters of @PathVariable
 
 ```java
-@GetMapping("/employees/{id}")
-public Employee getEmployee(@PathVariable Long id) {
+@PathVariable(value = "id", required = true)
+```
+
+• `value` → Name of the path variable in URL.
+• `name` → Same as value (alias).
+• `required` → Whether the variable is mandatory (default = true).
+
+---
+
+## ✅ When To Use
+
+• When value is mandatory.
+• When value represents resource identity (like ID).
+• When designing RESTful APIs.
+
+---
+
+# 🟢 @RequestParam
+
+## ✅ What It Does
+
+• Used to extract values from **query parameters**.
+• Binds URL query parameters to method arguments.
+• Used for filtering, searching, pagination.
+• Value is optional or additional data.
+• Works with GET and POST.
+
+---
+
+## ✅ Syntax Example
+
+```java
+@GetMapping("/users")
+public List<User> getUsers(@RequestParam String city) {
+    return userService.getUsersByCity(city);
 }
 ```
+
+URL:
+
+```
+/users?city=Mumbai
+```
+
+Here → `Mumbai` is mapped to `city`.
+
+---
+
+## ✅ Parameters of @RequestParam
+
+```java
+@RequestParam(
+    value = "city",
+    required = true,
+    defaultValue = "Pune"
+)
+```
+
+• `value` → Name of query parameter.
+• `name` → Same as value (alias).
+• `required` → Whether parameter is mandatory (default = true).
+• `defaultValue` → Value used if parameter is missing.
+
+---
+
+# 🟢 Key Differences
+
+| Feature              | @PathVariable | @RequestParam             |
+| -------------------- | ------------- | ------------------------- |
+| Source               | URL path      | Query parameter           |
+| Mandatory by default | Yes           | Yes                       |
+| Used for             | Resource ID   | Filtering / optional data |
+| Example              | /users/5      | /users?city=Mumbai        |
+
+---
+
+# 🟢 Quick Rule to Remember
+
+• If value is part of URL structure → use `@PathVariable`
+• If value is extra/filter/search parameter → use `@RequestParam`
+
+---
+
+If you want, I can also write notes on:
+
+• @RequestBody
+• @ModelAttribute
+• @RequestHeader
+• @RestController vs @Controller
+
+Tell me next 👌
+
 
 ---
 

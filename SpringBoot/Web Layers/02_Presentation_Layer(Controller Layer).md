@@ -1,9 +1,8 @@
-Here are your **complete notes in `.md` format**, including PDF content + additional important concepts about the Presentation Layer.
-
----
-
+# Presentation Layer (Controller Layer) – Spring Boot Notes 
+Covered Notes
+(Annotated Controllers , Request Mapping , Shortcut Annotations (Recommended) , Dynamic URL Handling ,  @RequestBody , Response Handling , Exception Handling , Data Validation 0 
 ````md
-# Presentation Layer (Controller Layer) – Spring Boot Notes
+
 
 ## 1️⃣ What is Presentation Layer?
 

@@ -319,14 +319,17 @@ If it extends Repository, it is part of hierarchy.
 If it does NOT extend Repository, it is a support interface.
 
 ---
+```
 
 # 🔷 1️⃣ Repository<T, ID>
 
 ## ✅ Responsibility
 
-* Marker interface
-* Enables Spring to create proxy implementation
-* Provides type safety
+• Enables Spring to create a proxy implementation at runtime.
+• Acts as a marker interface in Spring Data.
+• Defines domain type and primary key type using generics.
+• Does not provide CRUD methods directly.
+• Serves as the root of the repository hierarchy.
 
 ## 🔷 Methods
 
@@ -343,8 +346,11 @@ public interface Repository<T, ID>
 
 ## ✅ Responsibility
 
-* Provides basic CRUD operations
-* Most fundamental working repository
+• Provides basic Create, Read, Update, Delete operations.
+• Defines methods like save(), findById(), findAll(), and delete().
+• Works with any entity and primary key type.
+• Returns Optional for single entity fetch operations.
+• Suitable for simple applications requiring basic database operations.
 
 ---
 
@@ -370,11 +376,13 @@ public interface Repository<T, ID>
 
 ## ✅ Responsibility
 
-* Adds pagination
-* Adds sorting capability
+• Extends CrudRepository.
+• Adds pagination support using Pageable.
+• Adds sorting support using Sort.
+• Allows fetching data in smaller pages instead of full lists.
+• Useful when working with large datasets.
 
 Extends: `CrudRepository`
-
 ---
 
 ## 🔷 Methods of PagingAndSortingRepository
@@ -389,11 +397,11 @@ Extends: `CrudRepository`
 # 🔷 4️⃣ JpaRepository<T, ID>
 
 ## ✅ Responsibility
-
-* Most commonly used interface
-* Adds JPA-specific operations
-* Provides batch operations
-* Flush control
+• Extends PagingAndSortingRepository.
+• Adds JPA-specific features like flush() and batch operations.
+• Returns List instead of Iterable for better usability.
+• Integrates directly with JPA EntityManager.
+• Most commonly used repository in Spring Boot projects.
 
 Extends: `PagingAndSortingRepository`
 
@@ -441,8 +449,11 @@ Extends: `PagingAndSortingRepository`
 
 ## ✅ Responsibility
 
-* Supports dynamic queries using Specification
-* Used for complex filtering
+• Supports dynamic query building using Specification.
+• Allows combining multiple conditions at runtime.
+• Works well for complex filtering scenarios.
+• Supports pagination and sorting with specifications.
+• Used mainly in advanced search features.
 
 Does NOT extend JpaRepository
 It is implemented alongside it.
@@ -477,7 +488,11 @@ public interface UserRepository
 
 ### Responsibility
 
-* Pagination abstraction
+• Represents pagination configuration.
+• Stores page number and page size.
+• Can include sorting information.
+• Passed as a parameter to repository methods.
+• Converts internally to SQL LIMIT and OFFSET.
 
 ### Important Methods
 
@@ -494,7 +509,11 @@ public interface UserRepository
 
 ### Responsibility
 
-* Represents paginated result
+• Represents paginated result data.
+• Contains both content and pagination metadata.
+• Provides methods like getContent() and getTotalPages().
+• Helps check next/previous page availability.
+• Returned by repository methods using pagination.
 
 ### Methods
 
@@ -512,7 +531,11 @@ public interface UserRepository
 
 ### Responsibility
 
-* Sorting abstraction
+• Represents sorting configuration.
+• Supports ascending and descending order.
+• Can sort by one or multiple fields.
+• Can be used independently or inside Pageable.
+• Converts internally to SQL ORDER BY.
 
 ### Methods
 

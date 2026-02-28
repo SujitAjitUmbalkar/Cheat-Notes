@@ -142,3 +142,29 @@ Structure:
 | Return Type | List<T> | Multiple rows | List<Product> |
 | Return Type | Page<T> | Paginated | Page<Product> |
 | Projection | Interface / DTO | Partial columns | List<ProductView> |
+
+# 🚀 Spring Boot JPA Auditing
+
+| Name                                             | Type       | Package                                          | Used On                        | Purpose                            | Why Important                             |
+| ------------------------------------------------ | ---------- | ------------------------------------------------ | ------------------------------ | ---------------------------------- | ----------------------------------------- |
+| `@EnableJpaAuditing`                             | Annotation | `org.springframework.data.jpa.repository.config` | Main / Config class            | Enables JPA Auditing               | Without this auditing will not activate   |
+| `@EntityListeners(AuditingEntityListener.class)` | Annotation | `jakarta.persistence`                            | Entity class                   | Registers auditing listener        | Connects entity with auditing system      |
+| `AuditingEntityListener`                         | Class      | `org.springframework.data.jpa.domain.support`    | Used inside `@EntityListeners` | Listens to entity lifecycle events | Automatically sets audit fields           |
+| `@CreatedDate`                                   | Annotation | `org.springframework.data.annotation`            | Entity field                   | Stores creation timestamp          | Tracks when entity was created            |
+| `@LastModifiedDate`                              | Annotation | `org.springframework.data.annotation`            | Entity field                   | Stores last update timestamp       | Tracks when entity was updated            |
+| `@CreatedBy`                                     | Annotation | `org.springframework.data.annotation`            | Entity field                   | Stores creator user                | Tracks who created entity                 |
+| `@LastModifiedBy`                                | Annotation | `org.springframework.data.annotation`            | Entity field                   | Stores last modifier user          | Tracks who updated entity                 |
+| `AuditorAware<T>`                                | Interface  | `org.springframework.data.domain`                | Custom class                   | Provides current logged-in user    | Required for @CreatedBy & @LastModifiedBy |
+| `Optional<T> getCurrentAuditor()`                | Method     | `AuditorAware`                                   | Implemented method             | Returns current user               | Supplies user info to auditing system     |
+| `SecurityContextHolder`                          | Class      | `org.springframework.security.core.context`      | Security integration           | Gets authentication object         | Used in real projects for logged-in user  |
+| `Authentication`                                 | Interface  | `org.springframework.security.core`              | Security integration           | Represents logged-in user          | Used to extract username                  |
+| `getName()`                                      | Method     | `Authentication`                                 | Security integration           | Returns username                   | Used inside AuditorAware                  |
+| `@PrePersist`                                    | Annotation | `jakarta.persistence`                            | Lifecycle callback             | Triggered before insert            | Internally used by auditing               |
+| `@PreUpdate`                                     | Annotation | `jakarta.persistence`                            | Lifecycle callback             | Triggered before update            | Internally used by auditing               |
+| `LocalDateTime`                                  | Class      | `java.time`                                      | Entity field                   | Date-time storage                  | Recommended type for timestamps           |
+| `Instant`                                        | Class      | `java.time`                                      | Entity field                   | UTC timestamp storage              | Good for distributed systems              |
+| `@MappedSuperclass`                              | Annotation | `jakarta.persistence`                            | Base entity class              | Shares auditing fields             | Used for reusable audit base class        |
+| `@Embeddable`                                    | Annotation | `jakarta.persistence`                            | Audit metadata class           | Embeds audit object                | Clean design for large systems            |
+| `@Embedded`                                      | Annotation | `jakarta.persistence`                            | Entity field                   | Embeds audit class                 | Used with @Embeddable                     |
+| `auditorAwareRef`                                | Attribute  | `@EnableJpaAuditing`                             | Config                         | Links custom AuditorAware bean     | Needed when multiple beans exist          |
+

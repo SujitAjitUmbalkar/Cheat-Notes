@@ -63,7 +63,7 @@ User visits malicious website.
 Step 3
 Malicious site sends request to bank.
 
-Browser automatically attaches cookie.
+Browser automatically attaches cookie meanse session id .
 
 ```
 POST /transfer

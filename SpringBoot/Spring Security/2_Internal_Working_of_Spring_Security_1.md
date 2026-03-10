@@ -273,3 +273,180 @@ Request reaches controller
 Spring Security creates the bean springSecurityFilterChain.
 DelegatingFilterProxy only calls this bean.
 
+---
+
+# Step 4 — Default Behaviour of Spring Security
+
+When we add this dependency:
+
+```xml
+spring-boot-starter-security
+```
+
+Spring Security **automatically enables some default security features**. 
+
+You do **not write any code**, but security starts working.
+
+---
+
+# 1️⃣ Creates `springSecurityFilterChain`
+
+Spring Security automatically creates a bean:
+
+```text
+springSecurityFilterChain
+```
+
+This bean is the **main security filter chain** that checks every request.
+
+Simple meaning:
+
+```text
+All requests pass through security filters
+```
+
+---
+
+# 2️⃣ Enables HTTP Basic Authentication
+
+Spring Security enables **HTTP Basic Authentication** by default.
+
+Example request:
+
+```
+Authorization: Basic username:password
+```
+
+This is commonly used for:
+
+```text
+APIs
+Web services
+Testing with Postman
+```
+
+---
+
+# 3️⃣ Generates Default Login Form
+
+If you open your application in browser:
+
+```
+http://localhost:8080
+```
+
+You will see a **default login page** automatically created by Spring Security.
+
+You did **not create this page**.
+
+Spring Security generated it.
+
+---
+
+# 4️⃣ Creates Default User
+
+Spring Security automatically creates a user:
+
+```text
+username : user
+```
+
+Password is **generated automatically**.
+
+You will see it in the console when the application starts.
+
+Example:
+
+```text
+Using generated security password: 7d5a3c1e-9a24
+```
+
+So login becomes:
+
+```text
+username: user
+password: (generated password)
+```
+
+---
+
+# 5️⃣ Password Stored Using BCrypt
+
+Spring Security protects passwords using:
+
+```text
+BCrypt
+```
+
+Meaning:
+
+```text
+passwords are stored in encrypted form
+```
+
+Example:
+
+```
+$2a$10$9Qf...
+```
+
+Not plain text.
+
+---
+
+# 6️⃣ Logout Feature Enabled
+
+Spring Security automatically provides:
+
+```
+/logout
+```
+
+So when user logs out:
+
+```text
+Session is cleared
+User becomes unauthenticated
+```
+
+---
+
+# 7️⃣ CSRF Protection Enabled
+
+Spring Security automatically enables protection against:
+
+```text
+CSRF attack
+```
+
+This protects forms and state-changing requests like:
+
+```
+POST
+PUT
+DELETE
+```
+
+---
+
+# Simple Way to Remember
+
+When Spring Security starts, it automatically gives:
+
+```text
+Login page
+Default user
+Generated password
+Password encryption
+Logout support
+CSRF protection
+```
+
+---
+
+✅ **Key Idea**
+
+```text
+Add spring-boot-starter-security
+→ Spring Boot automatically enables basic security
+```

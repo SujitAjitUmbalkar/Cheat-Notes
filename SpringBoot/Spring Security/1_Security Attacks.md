@@ -128,6 +128,15 @@ SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 If token missing → **403 Forbidden**
 
+### Diff between sessionid and csrf token 
+
+| Session ID                    | CSRF Token                                 |
+| ----------------------------- | ------------------------------------------ |
+| Stored in **cookies**         | Usually in **hidden form field or header** |
+| Identifies **user session**   | Protects against **CSRF attacks**          |
+| Sent automatically by browser | Must be sent **explicitly with request**   |
+
+
 ---
 
 # 4. XSS (Cross-Site Scripting)

@@ -370,7 +370,7 @@ password: (generated password)
 
 ---
 
-# 5️⃣ Password Stored Using BCrypt
+# 5️⃣ Password Stored Using BCrypt ,  BCrypt is a password hashing algorithm used to securely store passwords.
 
 Spring Security protects passwords using:
 

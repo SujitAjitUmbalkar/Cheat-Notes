@@ -217,6 +217,10 @@ DelegatingFilterProxy does NOT contain security logic
 
 It only **delegates work to a Spring bean**.
 
+Tomcat cannot directly call Spring beans.
+
+So we need a bridge between Tomcat and Spring Security.
+
 ---
 
 ### 3️⃣ Spring Security creates a bean

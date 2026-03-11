@@ -455,3 +455,106 @@ CSRF protection
 Add spring-boot-starter-security
 → Spring Boot automatically enables basic security
 ```
+
+# Step 5 — INTERNAL WORKING OF SPRING SECURITY PART 2
+
+<img width="1409" height="782" alt="2_Internal_Working_of_Spring_Security_2" src="https://github.com/user-attachments/assets/0d867e41-e870-43dc-a315-86fa8d3c5c26" />
+
+## Step 1 — Security Filters Chain Executes
+
+Current flow:
+
+```text
+Client
+ ↓
+Tomcat
+ ↓
+DelegatingFilterProxy
+ ↓
+springSecurityFilterChain
+ ↓
+FilterChainProxy
+```
+
+After **FilterChainProxy**, the **Security Filter Chain** starts executing.
+
+`FilterChainProxy` runs **multiple security filters sequentially**.
+
+```text
+FilterChainProxy
+      ↓
+runs → Filter 1
+      ↓
+runs → Filter 2
+      ↓
+runs → Filter 3
+```
+
+These filters together form the **Security Filters Chain**.
+
+### Example Filters
+
+```
+SecurityContextPersistenceFilter
+UsernamePasswordAuthenticationFilter
+LogoutFilter
+ExceptionTranslationFilter
+AuthorizationFilter
+```
+
+Each filter has a **specific responsibility**.
+
+| Filter                               | Responsibility                    |
+| ------------------------------------ | --------------------------------- |
+| SecurityContextPersistenceFilter     | Loads logged-in user from session |
+| UsernamePasswordAuthenticationFilter | Handles login request             |
+| LogoutFilter                         | Handles logout                    |
+| AuthorizationFilter                  | Checks permissions                |
+
+---
+
+### Important Concept
+
+When a login request comes:
+
+```
+POST /login
+username = sujit
+password = 1234
+```
+
+The responsible filter is:
+
+```
+UsernamePasswordAuthenticationFilter
+```
+
+This filter detects that **authentication is required**.
+
+However, filters **do not verify credentials themselves**.
+
+So they **delegate authentication responsibility to**:
+
+```
+AuthenticationManager
+```
+
+---
+
+### Flow After Step 1
+
+```text
+Client
+ ↓
+DelegatingFilterProxy
+ ↓
+springSecurityFilterChain
+ ↓
+FilterChainProxy
+ ↓
+Security Filters Chain
+ ↓
+AuthenticationManager
+```
+
+

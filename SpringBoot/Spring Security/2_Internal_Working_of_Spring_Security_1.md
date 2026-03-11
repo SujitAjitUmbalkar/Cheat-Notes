@@ -826,3 +826,137 @@ Compares with stored hash
 If password is correct, authentication **succeeds**.
 
 Then Spring Security creates an **Authentication object representing the logged-in user**.
+---
+
+# Step 7 — Create `Authentication` Object (Authenticated User)
+
+Now `DaoAuthenticationProvider` creates an object representing the **authenticated user**.
+
+That object type is:
+
+```text
+Authentication
+```
+
+Example internally something like:
+
+```java
+Authentication auth =
+new UsernamePasswordAuthenticationToken(userDetails, password, authorities);
+```
+
+This object contains:
+
+| Field       | Meaning                        |
+| ----------- | ------------------------------ |
+| Principal   | UserDetails (user information) |
+| Credentials | password                       |
+| Authorities | roles / permissions            |
+
+Example:
+
+```text
+username = sujit
+roles = ROLE_USER
+authenticated = true
+```
+
+---
+
+# What Happens Next?
+
+This **authenticated object is returned back**.
+
+Return flow:
+
+```text
+DaoAuthenticationProvider
+        ↑
+AuthenticationManager
+        ↑
+UsernamePasswordAuthenticationFilter
+```
+
+---
+
+# Important Step — Store Authentication
+
+The filter now stores this authentication in:
+
+```text
+SecurityContext
+```
+
+Example:
+
+```java
+SecurityContextHolder.getContext().setAuthentication(auth);
+```
+
+Meaning:
+
+```text
+User is now logged in
+```
+
+Spring Security now **knows the current user**.
+
+---
+
+# Final Flow
+
+```text
+Client Request
+      ↓
+Security Filters
+      ↓
+AuthenticationManager
+      ↓
+DaoAuthenticationProvider
+      ↓
+UserDetailsService
+      ↓
+Database
+      ↓
+PasswordEncoder
+      ↓
+Authentication Object Created
+      ↓
+Stored in SecurityContext
+```
+
+Now the request **continues to the controller**.
+
+Example:
+
+```java
+@GetMapping("/posts")
+```
+
+---
+
+# Simple Way to Remember Entire Flow
+
+```text
+Filter
+ ↓
+AuthenticationManager
+ ↓
+DaoAuthenticationProvider
+ ↓
+UserDetailsService
+ ↓
+Database
+ ↓
+Password Check
+ ↓
+Authentication Object
+ ↓
+SecurityContext
+```
+
+---
+
+✅ This **completes the last diagram in your PDF**.
+
+---

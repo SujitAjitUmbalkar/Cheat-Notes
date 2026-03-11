@@ -267,16 +267,17 @@ Registers DelegatingFilterProxy
       ↓
 DelegatingFilterProxy receives request and spring security creates bean of class FilterChainProxy , name of bean springSecurityFilterChain 
       ↓
-Calls bean "springSecurityFilterChain"
+Calls bean "springSecurityFilterChain" bean of FilterChianProxy
       ↓
-springSecurityFilterChain runs security filters
+filterchainproxy runs security filters
       ↓
 Request reaches controller
 ```
 
 Spring Security creates the bean springSecurityFilterChain.
 DelegatingFilterProxy only calls this bean.
-
+That bean contains list of filters , 
+and that filters are called by FilterChainproxy
 ---
 
 # Step 4 — Default Behaviour of Spring Security

@@ -567,3 +567,262 @@ Delegate authentication
 ```
 `AuthenticationProvider` is the component that **actually verifies username and password**.
 
+---
+
+Good 👍 Sujeet. Now we move to **Step 4**.
+
+Current flow:
+
+```text
+Security Filters Chain
+        ↓
+UsernamePasswordAuthenticationFilter
+        ↓
+AuthenticationManager
+        ↓
+AuthenticationProvider
+```
+
+---
+
+# Step 4 — `AuthenticationProvider`
+
+### What is AuthenticationProvider?
+
+It is a **Spring Security interface** responsible for:
+
+```text
+Verifying user credentials
+```
+
+Example:
+
+```text
+username = sujit
+password = 1234
+```
+
+`AuthenticationManager` sends this authentication request to:
+
+```text
+AuthenticationProvider
+```
+
+---
+
+# What does AuthenticationProvider do?
+
+It performs **two main checks**:
+
+```text
+1. Is this user present?
+2. Is the password correct?
+```
+
+But here is an important point:
+
+```text
+AuthenticationProvider does not directly access the database
+```
+In Spring Security the most common provider used is:
+
+```text
+DaoAuthenticationProvider
+```
+
+Its job is:
+
+```text
+Get user from database : UserDetailsService
+Check password using PasswordEncoder (BCrypt) : PasswordEncoder
+```
+---
+
+# What Happens Next?
+
+`UserDetailsService` will:
+
+```text
+Load the user from database
+```
+
+# Step 5 — `UserDetailsService`
+
+### What is `UserDetailsService`?
+
+It is a **Spring Security interface** whose job is:
+
+```text
+Load user information using username
+```
+
+It contains one important method:
+
+```java
+UserDetails loadUserByUsername(String username)
+```
+
+---
+
+# What Happens Here?
+
+`DaoAuthenticationProvider` calls:
+
+```java
+userDetailsService.loadUserByUsername(username);
+```
+
+Example:
+
+```text
+username = sujit
+```
+
+So the flow becomes:
+
+```text
+DaoAuthenticationProvider
+        ↓
+UserDetailsService.loadUserByUsername("sujit")
+```
+
+---
+
+# What Does `UserDetailsService` Do?
+
+Usually **you implement this interface** in your application.
+
+Example:
+
+```java
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+
+    public UserDetails loadUserByUsername(String username)
+    {
+        // fetch user from database
+    }
+}
+```
+
+Inside this method:
+
+```text
+Database is queried
+```
+
+Example:
+
+```sql
+SELECT * FROM users WHERE username = 'sujit'
+```
+
+---
+
+# What is Returned?
+
+`UserDetailsService` returns an object of type:
+
+```text
+UserDetails
+```
+
+This object contains:
+
+| Field       | Meaning             |
+| ----------- | ------------------- |
+| username    | user's username     |
+| password    | hashed password     |
+| authorities | roles / permissions |
+
+Example:
+
+```text
+username = sujit
+password = $2a$10$abcxyz... (BCrypt)
+role = ROLE_USER
+```
+
+---
+
+
+# Step 6 — Password Verification
+
+`DaoAuthenticationProvider` now compares:
+
+```text id="du3sx9"
+Entered Password  vs  Stored Password
+```
+
+Example:
+
+```text id="9yslhh"
+Entered password = 1234
+Stored password = $2a$10$ABCD...
+```
+
+But remember:
+
+```text id="1xvq0p"
+Stored password is hashed (BCrypt)
+```
+
+So Spring Security uses:
+
+```text id="b9c7zw"
+PasswordEncoder
+```
+
+Most commonly:
+
+```text id="gs7jyo"
+BCryptPasswordEncoder
+```
+
+---
+
+# What Actually Happens Internally
+
+Spring Security runs something like:
+
+```java id="v3b4aj"
+passwordEncoder.matches(rawPassword, storedPassword);
+```
+
+Example:
+
+```java id="9d1sfo"
+matches("1234", "$2a$10$ABCD...")
+```
+
+If password matches:
+
+```text id="gsj3zz"
+Authentication SUCCESS
+```
+
+If password does not match:
+
+```text id="o6f23p"
+Authentication FAILED
+```
+
+---
+
+# Important Point
+
+Spring **does not convert hash back to password**.
+
+Instead it:
+
+```text id="mkjmb3"
+Hashes the entered password
+↓
+Compares with stored hash
+```
+
+---
+
+If password is correct, authentication **succeeds**.
+
+Then Spring Security creates an **Authentication object representing the logged-in user**.

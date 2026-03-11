@@ -528,6 +528,8 @@ AuthenticationManager
 # Step 2 — AuthenticationManager
 
 `AuthenticationManager` is a **Spring Security interface** responsible for **authenticating the user**.
+ProviderManager contains a list of AuthenticationProviders.
+
 
 When a login request comes:
 

@@ -462,20 +462,6 @@ Add spring-boot-starter-security
 
 ## Step 1 — Security Filters Chain Executes
 
-Current flow:
-
-```text
-Client
- ↓
-Tomcat
- ↓
-DelegatingFilterProxy
- ↓
-springSecurityFilterChain
- ↓
-FilterChainProxy
-```
-
 After **FilterChainProxy**, the **Security Filter Chain** starts executing.
 
 `FilterChainProxy` runs **multiple security filters sequentially**.
@@ -539,22 +525,45 @@ So they **delegate authentication responsibility to**:
 AuthenticationManager
 ```
 
----
+# Step 2 — AuthenticationManager
 
-### Flow After Step 1
+`AuthenticationManager` is a **Spring Security interface** responsible for **authenticating the user**.
+
+When a login request comes:
 
 ```text
-Client
- ↓
-DelegatingFilterProxy
- ↓
-springSecurityFilterChain
- ↓
-FilterChainProxy
- ↓
-Security Filters Chain
- ↓
-AuthenticationManager
+username = sujit
+password = 1234
 ```
 
+`UsernamePasswordAuthenticationFilter` sends it to:
+
+```text
+AuthenticationManager.authenticate()
+```
+
+---
+
+## Important
+
+`AuthenticationManager` **does not verify credentials itself**.
+
+It forwards the authentication request to:
+
+```text
+AuthenticationProvider
+```
+
+---
+
+## Responsibility
+
+```text
+Receive authentication request
+↓
+Select appropriate AuthenticationProvider
+↓
+Delegate authentication
+```
+`AuthenticationProvider` is the component that **actually verifies username and password**.
 

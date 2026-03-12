@@ -112,3 +112,103 @@ Create Authentication Object
 AuthenticationManager
 ```
 ---
+
+# STEP 2 — AuthenticationManager
+
+After the login filter creates the **Authentication object**, it sends it to:
+
+```
+AuthenticationManager
+```
+
+Diagram flow:
+
+```
+UsernamePasswordAuthenticationFilter
+        ↓
+AuthenticationManager
+```
+
+---
+
+## What is AuthenticationManager?
+
+`AuthenticationManager` is an **interface** in Spring Security.
+
+Its **main job** is:
+
+```
+Authenticate the user
+```
+
+It contains one important method:
+
+```java
+Authentication authenticate(Authentication authentication)
+```
+
+Meaning:
+
+```
+Take authentication request
+Verify user
+Return authenticated object
+```
+
+---
+
+## Example Flow
+
+The filter sends this object:
+
+```
+UsernamePasswordAuthenticationToken
+(
+ username = sujeet
+ password = 1234
+ authenticated = false
+)
+```
+
+to:
+
+```
+AuthenticationManager.authenticate()
+```
+
+Example internally:
+
+```java
+authenticationManager.authenticate(authenticationToken);
+```
+
+---
+
+## Important Concept ⚠️
+
+`AuthenticationManager` **does NOT actually authenticate the user itself**.
+
+Instead it **delegates the work** to another class.
+
+That class is:
+
+```
+ProviderManager
+```
+
+So internally:
+
+```
+AuthenticationManager
+      ↓ implemented by
+ProviderManager
+```
+Flow:
+
+```
+UsernamePasswordAuthenticationFilter
+        ↓
+AuthenticationManager
+        ↓
+ProviderManager
+```

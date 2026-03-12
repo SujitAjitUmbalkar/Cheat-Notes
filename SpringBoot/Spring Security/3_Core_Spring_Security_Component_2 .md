@@ -212,3 +212,188 @@ AuthenticationManager
         ↓
 ProviderManager
 ```
+Your notes are already good 👍 Sujeet. The only thing missing is the **clear placement of `AuthenticationProvider` between `ProviderManager` and `DaoAuthenticationProvider`**.
+
+I'll correct and slightly improve your notes without changing your teaching style.
+
+---
+
+# STEP 3 — ProviderManager
+
+From the previous step:
+
+```
+UsernamePasswordAuthenticationFilter
+        ↓
+AuthenticationManager
+        ↓
+ProviderManager
+```
+
+`ProviderManager` is the **actual implementation of AuthenticationManager**.
+
+So when this runs:
+
+```java
+authenticationManager.authenticate(authentication);
+```
+
+Internally it becomes:
+
+```java
+providerManager.authenticate(authentication);
+```
+
+---
+
+# What is ProviderManager?
+
+`ProviderManager` is a class whose job is:
+
+```
+Manage multiple AuthenticationProviders
+```
+
+Internally it contains a **list of AuthenticationProvider objects**.
+
+Example internally:
+
+```java
+List<AuthenticationProvider> providers;
+```
+
+So the structure looks like:
+
+```
+ProviderManager
+     │
+     ├── AuthenticationProvider
+     ├── AuthenticationProvider
+     ├── AuthenticationProvider
+```
+
+---
+
+# What is AuthenticationProvider?
+
+`AuthenticationProvider` is an **interface in Spring Security**.
+
+Its job is:
+
+```
+Perform the actual authentication logic
+```
+
+It defines two important methods:
+
+```java
+Authentication authenticate(Authentication authentication);
+
+boolean supports(Class<?> authentication);
+```
+
+Meaning:
+
+| Method         | Purpose                                                   |
+| -------------- | --------------------------------------------------------- |
+| authenticate() | performs authentication                                   |
+| supports()     | checks if this provider supports this authentication type |
+
+So **AuthenticationProvider = authentication contract**.
+
+---
+
+# Implementations of AuthenticationProvider
+
+Different classes implement this interface.
+
+Example:
+
+| Provider                     | Purpose                 |
+| ---------------------------- | ----------------------- |
+| DaoAuthenticationProvider    | database authentication |
+| LdapAuthenticationProvider   | LDAP authentication     |
+| JwtAuthenticationProvider    | JWT authentication      |
+| CustomAuthenticationProvider | custom authentication   |
+
+So the structure becomes:
+
+```
+ProviderManager
+     │
+     ├── DaoAuthenticationProvider
+     ├── LdapAuthenticationProvider
+     ├── JwtAuthenticationProvider
+```
+
+All of these **implement AuthenticationProvider**.
+
+---
+
+# Why Multiple AuthenticationProviders?
+
+Because applications may support **multiple authentication types**.
+
+Example:
+
+| Authentication Type | Provider                     |
+| ------------------- | ---------------------------- |
+| Database login      | DaoAuthenticationProvider    |
+| LDAP login          | LdapAuthenticationProvider   |
+| JWT login           | JwtAuthenticationProvider    |
+| Custom auth         | CustomAuthenticationProvider |
+
+Spring Security selects the **correct provider automatically**.
+
+---
+
+# How ProviderManager Works
+
+`ProviderManager` **loops through all providers** and checks:
+
+```
+Which provider supports this Authentication object?
+```
+
+Each provider implements:
+
+```java
+boolean supports(Class<?> authentication)
+```
+
+Example authentication object:
+
+```
+UsernamePasswordAuthenticationToken
+```
+
+So only the **matching provider performs authentication**.
+
+---
+
+# In Most Applications
+
+The most commonly used provider is:
+
+```
+DaoAuthenticationProvider
+```
+---
+
+# Updated Flow (Correct)
+
+```
+Client
+  ↓
+Security Filters
+  ↓
+UsernamePasswordAuthenticationFilter
+  ↓
+AuthenticationManager
+  ↓
+ProviderManager
+  ↓
+AuthenticationProvider
+  ↓
+DaoAuthenticationProvider
+```

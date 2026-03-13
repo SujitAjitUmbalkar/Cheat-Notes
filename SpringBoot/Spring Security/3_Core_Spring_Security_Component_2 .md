@@ -765,4 +765,148 @@ storedPassword
 Then it compares with the **entered password** using:
 
 PasswordEncoder 
+
 ---
+
+# STEP 7 — PasswordEncoder
+---
+
+# 1️⃣ What is PasswordEncoder
+
+`PasswordEncoder` is an **interface**.
+
+Purpose:
+
+```
+Securely verify passwords
+```
+
+It ensures that **passwords are not stored in plain text** in the database.
+
+---
+
+# 2️⃣ Why PasswordEncoder is Needed
+
+If passwords were stored like this:
+
+```
+password = 123456
+```
+
+Anyone accessing the database could see user passwords ❌
+
+So passwords are stored **encrypted (hashed)**.
+
+Example stored password:
+
+```
+$2a$10$3kYQ8n2T....
+```
+
+This is created using:
+
+```
+BCrypt hashing
+```
+
+---
+
+# 3️⃣ Common Implementation
+
+Most commonly used implementation:
+
+```
+BCryptPasswordEncoder
+```
+
+Example configuration:
+
+```java
+@Bean
+public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+}
+```
+
+---
+
+# 4️⃣ How Password Verification Happens
+
+Inside `DaoAuthenticationProvider`:
+
+```
+enteredPassword  → from login request
+storedPassword   → from UserDetails
+```
+
+Then Spring calls:
+
+```java
+passwordEncoder.matches(rawPassword, encodedPassword);
+```
+
+Example:
+
+```java
+passwordEncoder.matches("1234", "$2a$10$kjd8sjk...");
+```
+
+If result:
+
+```
+true → authentication success
+false → authentication fails
+```
+
+---
+
+# 5️⃣ What Happens If Password Matches
+
+If password is correct:
+
+Spring creates a **fully authenticated object**:
+
+```
+UsernamePasswordAuthenticationToken
+```
+
+Now it contains:
+
+```
+username
+roles
+authorities
+authenticated = true
+```
+
+Then it is stored in:
+
+```
+SecurityContextHolder
+```
+
+This means the **user is now logged in**.
+
+---
+
+# Current Flow
+
+```
+Client
+ ↓
+UsernamePasswordAuthenticationFilter
+ ↓
+AuthenticationManager
+ ↓
+ProviderManager
+ ↓
+DaoAuthenticationProvider
+ ↓
+UserDetailsService
+ ↓
+UserDetails
+ ↓
+PasswordEncoder
+ ↓
+Authentication Success
+```

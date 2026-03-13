@@ -600,36 +600,11 @@ UserDetailsService
 ---
 
 # STEP 5 — UserDetailsService
-
-Current flow:
-
-```
-Client
- ↓
-UsernamePasswordAuthenticationFilter
- ↓
-AuthenticationManager
- ↓
-ProviderManager
- ↓
-DaoAuthenticationProvider
- ↓
-UserDetailsService   ← (Current Step)
-```
-
 ---
 
 # 1️⃣ What is UserDetailsService
 
 `UserDetailsService` is an **interface**.
-
-Purpose:
-
-```
-Load user from database
-```
-
-Spring Security **does not know how your database looks**, so it asks this component to fetch the user.
 
 ---
 
@@ -689,21 +664,6 @@ Example:
 ```java
 User user = userRepository.findByUsername(username);
 ```
-
-Flow:
-
-```
-DaoAuthenticationProvider
-        ↓
-UserDetailsService
-        ↓
-MyUserDetailsServiceImpl
-        ↓
-UserRepository
-        ↓
-Database
-```
-
 ---
 
 # 5️⃣ What This Method Returns
@@ -717,16 +677,6 @@ UserDetails
 Not the raw entity.
 
 So your code converts the user to `UserDetails`.
-
-Example:
-
-```java
-return new User(
-        user.getUsername(),
-        user.getPassword(),
-        authorities
-);
-```
 
 Now Spring receives a **UserDetails object**.
 
@@ -745,17 +695,7 @@ ProviderManager
  ↓
 DaoAuthenticationProvider
  ↓
-UserDetailsService
+UserDetailsService -> MyUserDetailesServiceImpl 
  ↓
 Database
 ```
-
-Next step will be:
-
-```
-UserDetails
-```
-
-which represents the **authenticated user object**.
-
----

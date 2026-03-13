@@ -589,3 +589,173 @@ UserDetails returned
  ↓
 PasswordEncoder.matches()
 ```
+Great 👍 Sujeet. Now we move to the **next step in the authentication flow** of Spring Security.
+
+We are **inside `DaoAuthenticationProvider`**, and the next component it calls is:
+
+```
+UserDetailsService
+```
+
+---
+
+# STEP 5 — UserDetailsService
+
+Current flow:
+
+```
+Client
+ ↓
+UsernamePasswordAuthenticationFilter
+ ↓
+AuthenticationManager
+ ↓
+ProviderManager
+ ↓
+DaoAuthenticationProvider
+ ↓
+UserDetailsService   ← (Current Step)
+```
+
+---
+
+# 1️⃣ What is UserDetailsService
+
+`UserDetailsService` is an **interface**.
+
+Purpose:
+
+```
+Load user from database
+```
+
+Spring Security **does not know how your database looks**, so it asks this component to fetch the user.
+
+---
+
+# 2️⃣ Main Method
+
+`UserDetailsService` has one important method:
+
+```java
+UserDetails loadUserByUsername(String username)
+```
+
+Meaning:
+
+```
+Take username
+Fetch user from database
+Return user details
+```
+
+Example call from `DaoAuthenticationProvider`:
+
+```java
+userDetailsService.loadUserByUsername(username);
+```
+
+---
+
+# 3️⃣ Developer Implements It
+
+Spring only provides the interface.
+
+You create the implementation.
+
+Example:
+
+```
+MyUserDetailsServiceImpl
+```
+
+Structure:
+
+```
+UserDetailsService (interface)
+        ▲
+        │
+MyUserDetailsServiceImpl (your class)
+```
+
+---
+
+# 4️⃣ What Happens Inside Your Implementation
+
+Inside your service you usually call the repository.
+
+Example:
+
+```java
+User user = userRepository.findByUsername(username);
+```
+
+Flow:
+
+```
+DaoAuthenticationProvider
+        ↓
+UserDetailsService
+        ↓
+MyUserDetailsServiceImpl
+        ↓
+UserRepository
+        ↓
+Database
+```
+
+---
+
+# 5️⃣ What This Method Returns
+
+`loadUserByUsername()` must return:
+
+```
+UserDetails
+```
+
+Not the raw entity.
+
+So your code converts the user to `UserDetails`.
+
+Example:
+
+```java
+return new User(
+        user.getUsername(),
+        user.getPassword(),
+        authorities
+);
+```
+
+Now Spring receives a **UserDetails object**.
+
+---
+
+# Current Flow
+
+```
+Client
+ ↓
+UsernamePasswordAuthenticationFilter
+ ↓
+AuthenticationManager
+ ↓
+ProviderManager
+ ↓
+DaoAuthenticationProvider
+ ↓
+UserDetailsService
+ ↓
+Database
+```
+
+Next step will be:
+
+```
+UserDetails
+```
+
+which represents the **authenticated user object**.
+
+---

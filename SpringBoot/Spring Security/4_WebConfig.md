@@ -60,3 +60,10 @@ Login → use form login page
 `SecurityFilterChain` is configured to **customize request security rules in Spring Security** (who can access which endpoints and how authentication should happen).
 
 --- 
+
+### Steps 
+1. Create config class
+2. Define SecurityFilterChain bean
+3. Set authorization rules
+4. Configure login method
+5. build()

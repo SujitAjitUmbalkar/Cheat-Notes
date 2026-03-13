@@ -910,3 +910,145 @@ PasswordEncoder
  ↓
 Authentication Success
 ```
+
+Great 👍 Sujeet. Now we finish the **final step of the authentication flow** in Spring Security.
+
+We reached here:
+
+```
+PasswordEncoder
+        ↓
+Password verified
+```
+
+If the password **matches**, authentication succeeds.
+
+---
+
+# STEP 8 — Authentication Success & SecurityContext
+---
+
+# 1️⃣ Create Authenticated Object
+
+When authentication succeeds, Spring creates a **new Authentication object**.
+
+Example:
+
+```
+UsernamePasswordAuthenticationToken
+```
+
+But now it contains **complete user information**.
+
+Structure:
+
+```
+UsernamePasswordAuthenticationToken
+   ├── principal (UserDetails)
+   ├── authorities (roles)
+   └── authenticated = true
+```
+
+Example:
+
+```
+username = sujeet
+roles = ROLE_USER
+authenticated = true
+```
+
+---
+
+# 2️⃣ Store Authentication in SecurityContext
+
+Now Spring stores this authenticated object inside:
+
+```
+SecurityContext
+```
+
+Managed by:
+
+```
+SecurityContextHolder
+```
+
+Flow:
+
+```
+Authentication
+       ↓
+SecurityContext
+       ↓
+SecurityContextHolder
+```
+
+This means:
+
+```
+Current user is now authenticated
+```
+
+Spring Security will use this **for the rest of the request**.
+
+---
+
+# 3️⃣ Request Continues in Filter Chain
+
+After authentication is stored:
+
+```
+Security Filters
+       ↓
+Controller
+```
+
+Now the request finally reaches the controller.
+
+Example:
+
+```java
+@GetMapping("/posts")
+public List<Post> getPosts() {
+    return postService.getPosts();
+}
+```
+
+Spring Security now knows:
+
+```
+Which user is making the request
+What roles the user has
+```
+
+So authorization checks can happen.
+
+---
+
+# Final Authentication Flow (Complete)
+
+```
+Client
+ ↓
+UsernamePasswordAuthenticationFilter
+ ↓
+AuthenticationManager
+ ↓
+ProviderManager
+ ↓
+AuthenticationProvider
+ ↓
+DaoAuthenticationProvider
+ ↓
+UserDetailsService
+ ↓
+UserDetails
+ ↓
+PasswordEncoder
+ ↓
+Authentication Success
+ ↓
+SecurityContextHolder
+ ↓
+Controller
+```

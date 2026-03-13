@@ -589,10 +589,6 @@ UserDetails returned
  ↓
 PasswordEncoder.matches()
 ```
-Great 👍 Sujeet. Now we move to the **next step in the authentication flow** of Spring Security.
-
-We are **inside `DaoAuthenticationProvider`**, and the next component it calls is:
-
 ```
 UserDetailsService
 ```
@@ -699,3 +695,74 @@ UserDetailsService -> MyUserDetailesServiceImpl
  ↓
 Database
 ```
+Now the method `loadUserByUsername()` returns something important.
+
+---
+
+# STEP 6 — UserDetails
+---
+
+# 1️⃣ What is UserDetails
+
+`UserDetails` is an **interface**.
+
+Purpose:
+
+```
+Represent the authenticated user
+```
+
+It is basically an **object that holds user information** required by Spring Security.
+
+---
+
+# 2️⃣ What Information UserDetails Contains
+
+`UserDetails` contains security-related data like:
+
+Example structure:
+
+```
+UserDetails
+   ├── username
+   ├── password
+   ├── authorities
+   ├── accountNonExpired
+   ├── accountNonLocked
+   ├── credentialsNonExpired
+   └── enabled
+```
+
+Spring Security uses this object for **authentication and authorization**.
+
+---
+
+# 3️⃣ Who Creates UserDetails
+
+The `UserDetailsService` implementation creates and returns i
+So flow becomes:
+
+```
+UserDetailsService
+        ↓
+Fetch user from database
+        ↓
+Create UserDetails object
+        ↓
+Return to DaoAuthenticationProvider
+```
+
+---
+
+# 4️⃣ How DaoAuthenticationProvider Uses It
+
+After receiving `UserDetails`, `DaoAuthenticationProvider` extracts:
+
+```
+storedPassword
+```
+
+Then it compares with the **entered password** using:
+
+PasswordEncoder 
+---

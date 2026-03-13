@@ -420,3 +420,172 @@ authenticate(authentication)
 and **that provider performs the actual authentication**.
 
 ---
+---
+
+# STEP 4 — DaoAuthenticationProvider
+
+# 1️⃣ What is DaoAuthenticationProvider
+
+`DaoAuthenticationProvider` is a **class** that **implements AuthenticationProvider**.
+
+Relation:
+
+```
+AuthenticationProvider (interface)
+        ▲
+        │
+DaoAuthenticationProvider (class)
+```
+
+Purpose:
+
+```
+Authenticate user using database
+```
+
+It is the **most commonly used AuthenticationProvider** in Spring Boot applications.
+
+---
+
+# 2️⃣ What DaoAuthenticationProvider Does
+
+It performs **two main tasks**:
+
+```
+1. Load user from database
+2. Verify password
+```
+
+But it **does not access the database directly**.
+
+Instead it uses two components.
+
+```
+UserDetailsService
+PasswordEncoder
+```
+
+Structure:
+
+```
+DaoAuthenticationProvider
+        │
+        ├── UserDetailsService
+        └── PasswordEncoder
+```
+
+---
+
+#  What Happens Internally
+
+When `ProviderManager` selects this provider:
+
+```
+ProviderManager
+       ↓
+DaoAuthenticationProvider.authenticate()
+```
+
+Then the process begins.
+
+### Step 1 — Receive Authentication Object
+
+```
+UsernamePasswordAuthenticationToken
+```
+
+Contains:
+
+```
+username
+password
+```
+
+---
+
+### Step 2 — Call UserDetailsService
+
+DaoAuthenticationProvider calls:
+
+```java
+loadUserByUsername(username)
+```
+
+Component used:
+
+```
+UserDetailsService
+```
+
+Purpose:
+
+```
+Fetch user from database
+```
+
+---
+
+### Step 3 — UserDetails Returned
+
+`UserDetailsService` returns:
+
+```
+UserDetails
+```
+
+This object represents the **user data**.
+
+Contains:
+
+```
+username
+password
+roles
+authorities
+```
+
+---
+
+### Step 4 — Password Verification
+
+Now password is checked using:
+
+```
+PasswordEncoder
+```
+
+Example:
+
+```
+BCryptPasswordEncoder
+```
+
+Verification:
+
+```java
+passwordEncoder.matches(rawPassword, encodedPassword)
+```
+
+If password matches → authentication success.
+
+---
+
+# Current Flow
+
+```
+Client
+ ↓
+UsernamePasswordAuthenticationFilter
+ ↓
+AuthenticationManager
+ ↓
+ProviderManager
+ ↓
+DaoAuthenticationProvider
+ ↓
+UserDetailsService.loadUserByUsername()
+ ↓
+UserDetails returned
+ ↓
+PasswordEncoder.matches()
+```

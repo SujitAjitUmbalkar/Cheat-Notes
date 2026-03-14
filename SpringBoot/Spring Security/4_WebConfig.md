@@ -112,9 +112,9 @@ Login → use form login page
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
-        http
+        httpSecurity
 
         // Authorization configuration
         .authorizeHttpRequests(auth -> auth

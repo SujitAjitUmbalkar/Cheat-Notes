@@ -215,3 +215,22 @@ Filters execute during requests
 | `addFilterAfter()`        | Adds a filter after a specified filter.                                  |
 
 ---
+
+### When we write implementation class of UserDetailSerice 
+
+* Default properties spring.security.user.* are ignored and not get printed 
+* Authentication uses users loaded from database.
+* Password must be encoded using PasswordEncoder.
+* Username entered in login must match the field used in loadUserByUsername().
+
+If user is not found, Spring shows Invalid username or password for security.
+
+**Why Default Password Is Not Printed (Spring Security)**
+
+1. When Spring Security is added, Spring Boot automatically creates a **default user** (`username = user`) and prints a **random password** in the console.
+2. This happens only when **no authentication-related beans** are defined in the project.
+3. If a custom `UserDetailsService` bean is created (like `UserService implements UserDetailsService`), Spring Boot assumes the developer will **handle authentication manually**.
+4. Because of this, Spring Boot **disables the default user and password generation**.
+5. Therefore **no password is printed in the console** when the application starts.
+6. Authentication will then use **database users loaded through `UserDetailsService` instead of the default in-memory user**.
+

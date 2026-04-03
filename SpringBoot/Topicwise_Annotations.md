@@ -45,6 +45,7 @@
 
 ---
 
+
 # 🧾 Bean Validation
 
 | Annotation | Purpose | Parameters |

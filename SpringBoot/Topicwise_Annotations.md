@@ -1,7 +1,54 @@
 # 🚀 Spring Boot Complete Notes (MVC + JPA + Validation + Exception Handling)
 
 ---
+🔷 Spring Beans – Complete Single Table
 
+| Category  | Annotation / Method | Where Used | Purpose / What it Does                       |
+| --------- | ------------------- | ---------- | -------------------------------------------- |
+| Core Bean | `@Component`        | Class      | Marks class as Spring-managed bean           |
+| Core Bean | `@Service`          | Class      | Service layer specialization of `@Component` |
+| Core Bean | `@Repository`       | Class      | DAO layer + exception translation            |
+| Core Bean | `@Controller`       | Class      | MVC controller                               |
+| Core Bean | `@RestController`   | Class      | REST API controller                          |
+| Core Bean | `@Configuration`    | Class      | Defines configuration class                  |
+| Core Bean | `@Bean`             | Method     | Manually creates and registers bean          |
+| Dependency Injection | `@Autowired`         | Field / Constructor / Setter | Auto inject dependency           |
+| Dependency Injection | `@Qualifier("name")` | Field / Param                | Resolve multiple beans           |
+| Dependency Injection | `@Primary`           | Class                        | Default bean selection           |
+| Dependency Injection | `@Inject`            | Field / Constructor          | Java alternative to `@Autowired` |
+| Dependency Injection | `@Resource`          | Field                        | Inject by name                   |
+| Scope    | `@Scope("singleton")`   | Class      | Default single instance |
+| Scope    | `@Scope("prototype")`   | Class      | New instance each time  |
+| Scope    | `@Scope("request")`     | Class      | Per HTTP request        |
+| Scope    | `@Scope("session")`     | Class      | Per session             |
+| Scope    | `@Scope("application")` | Class      | Per servlet context     |
+| Lifecycle | `@PostConstruct`                        | Method     | Called after bean init |
+| Lifecycle | `@PreDestroy`                           | Method     | Called before destroy  |
+| Lifecycle | `InitializingBean.afterPropertiesSet()` | Method     | Init callback          |
+| Lifecycle | `DisposableBean.destroy()`              | Method     | Destroy callback       |
+| Lifecycle | `initMethod` (in `@Bean`)               | Method ref | Custom init method     |
+| Lifecycle | `destroyMethod` (in `@Bean`)            | Method ref | Custom destroy method  |
+| Configuration | `@Value("${key}")`         | Field      | Inject property value   |
+| Configuration | `@PropertySource`          | Class      | Load properties file    |
+| Configuration | `@ConfigurationProperties` | Class      | Bind properties to POJO |
+| Conditional / Advanced | `@Conditional`      | Class / Method | Load bean conditionally      |
+| Conditional / Advanced | `@Profile("dev")`   | Class          | Environment-based beans      |
+| Conditional / Advanced | `@Lazy`             | Class / Field  | Lazy initialization          |
+| Conditional / Advanced | `@DependsOn`        | Class          | Control initialization order |
+| Context Methods | `ApplicationContext.getBean()` | Code       | Fetch bean manually    |
+| Context Methods | `BeanFactory.getBean()`        | Code       | Low-level bean access  |
+| Context Methods | `containsBean()`               | Code       | Check bean existence   |
+| Context Methods | `getBeanDefinitionNames()`     | Code       | List all beans         |
+| Aware Interfaces | `BeanNameAware`           | Class      | Get bean name             |
+| Aware Interfaces | `BeanFactoryAware`        | Class      | Access BeanFactory        |
+| Aware Interfaces | `ApplicationContextAware` | Class      | Access ApplicationContext |
+| Bean Lifecycle Flow | Bean Instantiation   | Internal   | Object creation        |
+| Bean Lifecycle Flow | Dependency Injection | Internal   | Inject dependencies    |
+| Bean Lifecycle Flow | `@PostConstruct`     | Method     | Init logic             |
+| Bean Lifecycle Flow | Bean Ready           | Internal   | Ready to use           |
+| Bean Lifecycle Flow | `@PreDestroy`        | Method     | Cleanup                |
+
+---
 
 # 🏗️ MVC Architecture & Core Concepts
 

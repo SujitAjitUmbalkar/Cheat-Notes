@@ -177,13 +177,46 @@ public ResponseEntity<?> createUser(@RequestBody @Valid UserDTO userDTO)
 
 ### Example: Entity
 ```java
+package com.codingshuttle.intro.Beans;
+
+import jakarta.persistence.*;
+
 @Entity
-@Table(name = "users")
+@Table(
+    name = "users",                          // 🔹 Table name
+    schema = "public",                       // 🔹 Schema name
+    catalog = "my_database",                 // 🔹 Catalog (DB name)
+
+    uniqueConstraints = {                    // 🔹 Composite Unique Constraints
+        @UniqueConstraint(
+            name = "uk_email_username",
+            columnNames = {"email", "username"}
+        )
+    },
+
+    indexes = {                              // 🔹 Indexes for performance
+        @Index(
+            name = "idx_email",
+            columnList = "email"
+        ),
+        @Index(
+            name = "idx_username_unique",
+            columnList = "username",
+            unique = true
+        )
+    }
+)
 public class User {
 
     @Id
     @GeneratedValue
     private Long id;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "username")
+    private String username;
 }
 ````
 

@@ -127,7 +127,11 @@ public class UserDTO {
     // getters & setters
 }
 ```
-
+## Usage of @Valid
+```
+@PostMapping
+public ResponseEntity<?> createUser(@RequestBody @Valid UserDTO userDTO)
+```
 ## 🚫 What Happens If You Skip DTO?
 
 | Problem          | Explanation                      |

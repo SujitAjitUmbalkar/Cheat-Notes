@@ -57,15 +57,74 @@ It covers **definitions, layers, annotations, usage, responsibilities, data flow
 | @Valid | Triggers validation on nested objects | (no parameters) |
 
 ### Example: DTO
-
-```java
+``` 
 public class UserDTO {
 
-    @NotBlank
+    @NotNull(message = "ID cannot be null")
+    private Long id;
+
+    @NotBlank(message = "Name cannot be blank")
+    @Size(min = 3, max = 50, message = "Name must be between 3 to 50 characters")
     private String name;
 
-    @Email
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email is required")
     private String email;
+
+    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits")
+    private String phone;
+
+    @Min(value = 18, message = "Age must be at least 18")
+    @Max(value = 60, message = "Age must not exceed 60")
+    private Integer age;
+
+    @Positive(message = "Salary must be positive")
+    private Double salary;
+
+    @PositiveOrZero(message = "Bonus cannot be negative")
+    private Double bonus;
+
+    @Negative(message = "Debt should be negative")
+    private Double debt;
+
+    @NegativeOrZero(message = "Balance must be zero or negative")
+    private Double balance;
+
+    @Past(message = "Date of birth must be in the past")
+    private LocalDate dob;
+
+    @PastOrPresent(message = "Joining date cannot be in future")
+    private LocalDate joiningDate;
+
+    @Future(message = "Expiry date must be in future")
+    private LocalDate expiryDate;
+
+    @FutureOrPresent(message = "Event date must be today or future")
+    private LocalDate eventDate;
+
+    @Digits(integer = 5, fraction = 2, message = "Invalid amount format")
+    private Double amount;
+
+    @DecimalMin(value = "1000.50", inclusive = true, message = "Minimum amount is 1000.50")
+    private Double minAmount;
+
+    @DecimalMax(value = "9999.99", inclusive = true, message = "Maximum amount is 9999.99")
+    private Double maxAmount;
+
+    @AssertTrue(message = "Terms must be accepted")
+    private Boolean termsAccepted;
+
+    @AssertFalse(message = "User must not be banned")
+    private Boolean isBanned;
+
+    @NotEmpty(message = "Roles cannot be empty")
+    private List<String> roles;
+
+    // Nested Object Validation
+    @Valid
+    private AddressDTO address;
+
+    // getters & setters
 }
 ```
 

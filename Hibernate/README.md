@@ -1,1 +1,1 @@
-This repo contains notes of Hibernate 
+This repo contains notes of Hibernate .

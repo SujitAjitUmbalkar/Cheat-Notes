@@ -274,10 +274,7 @@ filterchainproxy runs security filters
 Request reaches controller
 ```
 
-Spring Security creates the bean springSecurityFilterChain.
-DelegatingFilterProxy only calls this bean.
-That bean contains list of filters , 
-and that filters are called by FilterChainproxy
+Spring Security creates a bean named springSecurityFilterChain. The DelegatingFilterProxy does not contain security logic itself; it simply delegates requests to this bean. This bean internally holds a list of security filters, which are executed through the FilterChainProxy.
 ---
 
 # Step 4 — Default Behaviour of Spring Security

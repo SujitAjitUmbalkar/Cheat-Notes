@@ -699,6 +699,10 @@ Now the method `loadUserByUsername()` returns something important.
 
 ---
 
+**InMemoryUserDetailsManager – Role (short):**
+It is an implementation of **UserDetailsService** that stores user details (username, password, roles) **in memory (RAM)** instead of a database. It is mainly used for **testing, demos, or simple applications**, and provides users when `loadUserByUsername()` is called during authentication.
+
+
 # STEP 6 — UserDetails
 ---
 

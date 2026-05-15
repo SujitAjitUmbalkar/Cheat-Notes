@@ -216,3 +216,87 @@ Structure:
 | `@Embedded`                                      | Annotation | `jakarta.persistence`                            | Entity field                   | Embeds audit class                 | Used with @Embeddable                     |
 | `auditorAwareRef`                                | Attribute  | `@EnableJpaAuditing`                             | Config                         | Links custom AuditorAware bean     | Needed when multiple beans exist          |
 
+
+
+# 🧪 Spring Boot Testing – Annotations & Methods Cheat Sheet
+
+| Category       | Annotation / Method      | Meaning                       | Example                                |
+| -------------- | ------------------------ | ----------------------------- | -------------------------------------- |
+| Core Test      | `@Test`                  | Marks test method             | `@Test void saveUser(){}`              |
+| Display        | `@DisplayName`           | Custom test name              | `@DisplayName("Login Test")`           |
+| Disable        | `@Disabled`              | Skip test                     | `@Disabled("Pending")`                 |
+| Repeated       | `@RepeatedTest`          | Run multiple times            | `@RepeatedTest(5)`                     |
+| Parameterized  | `@ParameterizedTest`     | Run with multiple inputs      | `@ParameterizedTest`                   |
+| Parameterized  | `@ValueSource`           | Primitive input values        | `@ValueSource(strings={"A","B"})`      |
+| Parameterized  | `@CsvSource`             | CSV inputs                    | `@CsvSource({"1,2","3,4"})`            |
+| Parameterized  | `@MethodSource`          | Method-based data             | `@MethodSource("data")`                |
+| Lifecycle      | `@BeforeEach`            | Runs before every test        | `@BeforeEach void init(){}`            |
+| Lifecycle      | `@AfterEach`             | Runs after every test         | `@AfterEach void clean(){}`            |
+| Lifecycle      | `@BeforeAll`             | Runs once before all tests    | `@BeforeAll static void setup(){}`     |
+| Lifecycle      | `@AfterAll`              | Runs once after all tests     | `@AfterAll static void end(){}`        |
+| Assertions     | `assertEquals()`         | Compare values                | `assertEquals(2,a+b)`                  |
+| Assertions     | `assertNotEquals()`      | Values should differ          | `assertNotEquals(1,id)`                |
+| Assertions     | `assertTrue()`           | Condition true                | `assertTrue(flag)`                     |
+| Assertions     | `assertFalse()`          | Condition false               | `assertFalse(flag)`                    |
+| Assertions     | `assertNull()`           | Object should be null         | `assertNull(user)`                     |
+| Assertions     | `assertNotNull()`        | Object should exist           | `assertNotNull(user)`                  |
+| Assertions     | `assertThrows()`         | Expect exception              | `assertThrows(Exception.class,()->{})` |
+| Assertions     | `assertDoesNotThrow()`   | No exception expected         | `assertDoesNotThrow(()->{})`           |
+| Assertions     | `assertAll()`            | Multiple assertions           | `assertAll(...);`                      |
+| Assertions     | `fail()`                 | Force failure                 | `fail("Error")`                        |
+| Spring Boot    | `@SpringBootTest`        | Load full application context | `@SpringBootTest`                      |
+| MVC Test       | `@WebMvcTest`            | Test controller layer only    | `@WebMvcTest(UserController.class)`    |
+| JPA Test       | `@DataJpaTest`           | Test repository layer         | `@DataJpaTest`                         |
+| JDBC Test      | `@JdbcTest`              | Test JDBC components          | `@JdbcTest`                            |
+| JSON Test      | `@JsonTest`              | Test JSON serialization       | `@JsonTest`                            |
+| REST Client    | `@RestClientTest`        | Test REST clients             | `@RestClientTest`                      |
+| Mocking        | `@Mock`                  | Create Mockito mock           | `@Mock UserRepo repo;`                 |
+| Mocking        | `@InjectMocks`           | Inject mocks                  | `@InjectMocks UserService service;`    |
+| Mocking        | `@MockBean`              | Mock Spring bean              | `@MockBean UserRepo repo;`             |
+| Mocking        | `@Spy`                   | Partial mock                  | `@Spy List<String> list;`              |
+| Mockito        | `when()`                 | Define behavior               | `when(repo.findById(1L))`              |
+| Mockito        | `thenReturn()`           | Mock return value             | `thenReturn(user)`                     |
+| Mockito        | `verify()`               | Verify method called          | `verify(repo).save(user)`              |
+| Mockito        | `times()`                | Verify call count             | `verify(repo,times(2))`                |
+| Mockito        | `never()`                | Verify never called           | `verify(repo,never())`                 |
+| Mockito        | `any()`                  | Match any argument            | `any(User.class)`                      |
+| Mockito        | `eq()`                   | Exact match                   | `eq(1L)`                               |
+| Transaction    | `@Transactional`         | Rollback after test           | `@Transactional`                       |
+| SQL            | `@Sql`                   | Run SQL scripts               | `@Sql("/data.sql")`                    |
+| Profiles       | `@ActiveProfiles`        | Use test profile              | `@ActiveProfiles("test")`              |
+| Config         | `@TestConfiguration`     | Test-only config              | `@TestConfiguration`                   |
+| Properties     | `@TestPropertySource`    | Custom properties             | `@TestPropertySource(...)`             |
+| Context        | `@DirtiesContext`        | Reload Spring context         | `@DirtiesContext`                      |
+| Auto Configure | `@AutoConfigureMockMvc`  | Enable MockMvc                | `@AutoConfigureMockMvc`                |
+| Web Testing    | `MockMvc`                | Test REST endpoints           | `mockMvc.perform(...)`                 |
+| Web Testing    | `perform()`              | Send request                  | `perform(get("/users"))`               |
+| Web Testing    | `andExpect()`            | Validate response             | `andExpect(status().isOk())`           |
+| Web Testing    | `status()`               | HTTP status checks            | `status().isCreated()`                 |
+| Web Testing    | `jsonPath()`             | Validate JSON                 | `jsonPath("$.name")`                   |
+| HTTP           | `get()`                  | GET request                   | `get("/users")`                        |
+| HTTP           | `post()`                 | POST request                  | `post("/users")`                       |
+| HTTP           | `put()`                  | PUT request                   | `put("/users/1")`                      |
+| HTTP           | `delete()`               | DELETE request                | `delete("/users/1")`                   |
+| Security Test  | `@WithMockUser`          | Mock logged-in user           | `@WithMockUser`                        |
+| Security Test  | `@WithAnonymousUser`     | Anonymous user                | `@WithAnonymousUser`                   |
+| Security Test  | `csrf()`                 | Add CSRF token                | `.with(csrf())`                        |
+| Exception Test | `assertThrowsExactly()`  | Exact exception type          | `assertThrowsExactly(...)`             |
+| Async Test     | `@Async` + test          | Test async methods            | `future.get()`                         |
+| Timeout        | `assertTimeout()`        | Max execution time            | `assertTimeout(...)`                   |
+| Nested Tests   | `@Nested`                | Group related tests           | `class LoginTests{}`                   |
+| Order          | `@TestMethodOrder`       | Order tests                   | `@TestMethodOrder(...)`                |
+| Order          | `@Order`                 | Specify order                 | `@Order(1)`                            |
+| Conditional    | `@EnabledOnOs`           | Run on specific OS            | `@EnabledOnOs(OS.WINDOWS)`             |
+| Conditional    | `@EnabledOnJre`          | Run on JDK version            | `@EnabledOnJre(JRE.JAVA_21)`           |
+| Repository     | `save()`                 | Save entity                   | `repo.save(user)`                      |
+| Repository     | `findById()`             | Find by ID                    | `repo.findById(1L)`                    |
+| Repository     | `findAll()`              | Get all rows                  | `repo.findAll()`                       |
+| Repository     | `deleteById()`           | Delete row                    | `repo.deleteById(1L)`                  |
+| Repository     | `existsById()`           | Check existence               | `repo.existsById(1L)`                  |
+| Repository     | `count()`                | Count rows                    | `repo.count()`                         |
+| REST Template  | `TestRestTemplate`       | Integration API testing       | `restTemplate.getForObject()`          |
+| Environment    | `@DynamicPropertySource` | Dynamic properties            | `registry.add(...)`                    |
+| Containers     | `@Testcontainers`        | Enable Testcontainers         | `@Testcontainers`                      |
+| Containers     | `@Container`             | Define container              | `@Container PostgreSQLContainer<?>`    |
+| Bean Loading   | `@ContextConfiguration`  | Custom context config         | `@ContextConfiguration(classes=...)`   |
+| Bean Loading   | `@Import`                | Import config class           | `@Import(SecurityConfig.class)`        |

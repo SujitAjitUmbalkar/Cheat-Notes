@@ -100,3 +100,53 @@
 
 * **Deletion Protection** → Prevents accidental deletion of database.
   Extra safety feature for important production DBs.
+
+---
+
+## Inbound Rules
+
+Inbound rules control incoming traffic to AWS resources like Amazon EC2 or Amazon RDS.
+
+They define:
+
+* who can connect
+* which port is allowed
+* what type of traffic can enter
+
+Example:
+
+* Allow MySQL traffic on port 3306 from your IP.
+
+---
+
+## Outbound Rules
+
+Outbound rules control outgoing traffic from AWS resources.
+
+They define:
+
+* where the resource can send data
+* which ports/protocols are allowed outside
+
+Example:
+
+* Allow database server to send responses to applications or internet services.
+
+## Steps to Edit Inbound/Outbound Rules in AWS
+
+1. Open AWS Console
+2. Go to Amazon RDS or Amazon EC2
+3. Select your resource
+4. Open **Connectivity & Security** section
+5. Click the **Security Group** link
+6. Security Group page will open
+7. Go to:
+
+   * **Inbound Rules** tab OR
+   * **Outbound Rules** tab
+8. Click **Edit Rules**
+9. Add/Edit/Delete rules
+10. Click **Save Rules**
+
+---
+Security groups act like firewalls for AWS resources.

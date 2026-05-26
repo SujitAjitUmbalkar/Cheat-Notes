@@ -29,8 +29,9 @@
 
 * AWS is widely used in DevOps and modern software development.
   Many companies use it for hosting scalable applications.
-
-
+  
+* AWS is widely used in DevOps and modern software development.
+  Many companies use it for hosting scalable applications.
 ---
 
 ## RDS Creation Concepts (Short Notes)

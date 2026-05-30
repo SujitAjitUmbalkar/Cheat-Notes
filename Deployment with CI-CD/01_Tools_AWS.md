@@ -84,7 +84,7 @@ This is the flow teachers usually discuss during deployment classes.
 ---
 
 
-# AWS IAM (Identity and Access Management)
+# 1] AWS IAM (Identity and Access Management)
 
 ## Definition
 
@@ -242,3 +242,296 @@ Best Practices:
 * Least Privilege Principle
 * Avoid Root User
 * Use Groups for permission management
+
+---
+
+# 2] AWS EC2 (Elastic Compute Cloud)
+
+## Definition
+
+Amazon EC2 (Elastic Compute Cloud) is a service that provides virtual servers in the cloud.
+
+It allows users to launch, manage, and scale servers without purchasing physical hardware.
+
+**EC2 = Virtual Machine (VM) in AWS**
+
+Common Uses:
+
+* Hosting Spring Boot applications
+* Running websites
+* Deploying APIs
+* Running Docker containers
+* Hosting databases (for learning/testing)
+
+---
+
+## EC2 Components
+
+### 1. Instance
+
+An EC2 Instance is a virtual server.
+
+Examples:
+
+* t2.micro
+* t3.micro
+* t3.small
+* m5.large
+
+Each instance provides:
+
+* CPU
+* RAM
+* Storage
+* Network
+
+---
+
+### 2. AMI (Amazon Machine Image)
+
+AMI is a template used to launch an EC2 instance.
+
+It contains:
+
+* Operating System
+* Software
+* Configuration
+
+Examples:
+
+* Amazon Linux
+* Ubuntu
+* Windows Server
+
+Think of AMI as a "server blueprint."
+
+---
+
+### 3. Instance Types
+
+AWS provides different instance sizes.
+
+Categories:
+
+#### General Purpose
+
+Balanced CPU and RAM
+
+Examples:
+
+* t2.micro
+* t3.micro
+
+#### Compute Optimized
+
+High CPU performance
+
+Examples:
+
+* c5.large
+
+#### Memory Optimized
+
+High RAM
+
+Examples:
+
+* r5.large
+
+---
+
+### 4. EBS (Elastic Block Store)
+
+EBS is the storage attached to EC2.
+
+Features:
+
+* Persistent storage
+* Data remains after reboot
+* Can create snapshots
+* Can increase size later
+
+Think of EBS as the hard disk of your EC2 server.
+
+---
+
+### 5. Security Group
+
+Acts as a virtual firewall for EC2.
+
+Controls:
+
+* Incoming Traffic (Inbound Rules)
+* Outgoing Traffic (Outbound Rules)
+
+Examples:
+
+Port 22 → SSH
+
+Port 80 → HTTP
+
+Port 443 → HTTPS
+
+Port 8080 → Spring Boot Application
+
+---
+
+### 6. Key Pair
+
+Used for secure login into EC2.
+
+Consists of:
+
+* Public Key (stored by AWS)
+* Private Key (.pem file)
+
+Example:
+
+```bash
+ssh -i mykey.pem ec2-user@public-ip
+```
+
+Never share the private key.
+
+---
+
+### 7. Elastic IP
+
+A static public IP address.
+
+Purpose:
+
+* Fixed IP for applications
+* IP remains same after restart
+
+Without Elastic IP:
+
+* Public IP may change after stop/start.
+
+---
+
+## EC2 States
+
+1. Pending
+2. Running
+3. Stopping
+4. Stopped
+5. Rebooting
+6. Terminated
+
+Important:
+
+* Terminated instances cannot be recovered.
+
+---
+
+## Scaling EC2
+
+### Vertical Scaling
+
+Increase instance size.
+
+Example:
+
+```text
+t2.micro → t3.small
+```
+
+More CPU and RAM.
+
+---
+
+### Horizontal Scaling
+
+Add multiple EC2 instances.
+
+Example:
+
+```text
+1 Server → 5 Servers
+```
+
+Used with Load Balancer.
+
+---
+
+## Real-World Deployment Flow
+
+```text
+Developer
+    |
+    v
+GitHub
+    |
+    v
+EC2 Instance
+    |
+Spring Boot Application
+    |
+RDS Database
+```
+
+A Spring Boot JAR is commonly deployed on an EC2 instance.
+
+---
+
+## Best Practices
+
+1. Use IAM Roles instead of Access Keys.
+2. Open only required ports in Security Groups.
+3. Take EBS Snapshots regularly.
+4. Use Elastic IP only when required.
+5. Stop unused instances to reduce cost.
+6. Enable monitoring through CloudWatch.
+
+---
+
+## Interview Questions
+
+### What is EC2?
+
+EC2 is a service that provides scalable virtual servers in AWS.
+
+### What is AMI?
+
+A template containing OS and configurations used to launch EC2 instances.
+
+### What is Security Group?
+
+A virtual firewall controlling inbound and outbound traffic.
+
+### Difference Between EBS and S3?
+
+EBS:
+
+* Block Storage
+* Attached to EC2
+
+S3:
+
+* Object Storage
+* Independent storage service
+
+---
+
+## Quick Revision
+
+EC2 = Virtual Server in AWS
+
+Instance       → Virtual Machine
+AMI            → Server Template
+EBS            → Hard Disk
+Security Group → Firewall
+Key Pair       → Login Credentials
+Elastic IP     → Static Public IP
+
+Ports:
+22   → SSH
+80   → HTTP
+443  → HTTPS
+8080 → Spring Boot
+
+Scaling:
+Vertical   → Bigger Server
+Horizontal → More Servers
+

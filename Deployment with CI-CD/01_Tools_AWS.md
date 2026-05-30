@@ -535,3 +535,351 @@ Scaling:
 Vertical   → Bigger Server
 Horizontal → More Servers
 
+---
+
+# AWS S3 (Simple Storage Service)
+
+## Definition
+
+Amazon S3 (Simple Storage Service) is AWS's object storage service used to store and retrieve files from anywhere on the internet.
+
+S3 is highly durable, scalable, and cost-effective.
+
+Common Uses:
+
+* Store images and videos
+* Application file uploads
+* Static website hosting
+* Backups
+* Log storage
+* Data archiving
+
+---
+
+## Basic Concepts
+
+### 1. Bucket
+
+A Bucket is a container that stores objects (files).
+
+Example:
+
+```text
+my-app-files
+employee-documents
+springboot-backups
+```
+
+Rules:
+
+* Bucket names must be globally unique.
+* Created in a specific AWS Region.
+
+---
+
+### 2. Object
+
+An Object is a file stored inside a bucket.
+
+Examples:
+
+```text
+resume.pdf
+profile.jpg
+video.mp4
+backup.zip
+```
+
+Each object contains:
+
+* Data
+* Metadata
+* Unique Key
+
+---
+
+### 3. Object Key
+
+The unique name/path of an object.
+
+Example:
+
+```text
+images/profile.jpg
+documents/resume.pdf
+```
+
+Think of it as the file path inside S3.
+
+---
+
+## S3 Storage Classes
+
+### 1. S3 Standard
+
+Used for frequently accessed data.
+
+Examples:
+
+* Website images
+* Application files
+
+Features:
+
+* High availability
+* Low latency
+
+---
+
+### 2. S3 Standard-IA
+
+IA = Infrequent Access
+
+Used when data is accessed occasionally.
+
+Examples:
+
+* Monthly reports
+* Old documents
+
+Lower storage cost than Standard.
+
+---
+
+### 3. S3 Glacier Instant Retrieval
+
+Used for archival data that is rarely accessed.
+
+Examples:
+
+* Historical records
+* Compliance data
+
+Very low storage cost.
+
+---
+
+### 4. S3 Glacier Deep Archive
+
+Cheapest storage class.
+
+Used for long-term backups.
+
+Examples:
+
+* Old company backups
+* Legal archives
+
+---
+
+## Bucket Versioning
+
+Versioning keeps multiple versions of the same file.
+
+Example:
+
+```text
+resume.pdf (v1)
+resume.pdf (v2)
+resume.pdf (v3)
+```
+
+Benefits:
+
+* Recover deleted files
+* Restore older versions
+
+---
+
+## Lifecycle Rules
+
+Automatically move files between storage classes.
+
+Example:
+
+```text
+After 30 Days
+    ↓
+Standard → Standard-IA
+
+After 180 Days
+    ↓
+Glacier
+```
+
+Helps reduce storage cost.
+
+---
+
+## Bucket Policies
+
+Bucket policies control who can access bucket contents.
+
+Example:
+
+* Public Read
+* Private Access
+* Specific IAM Users
+
+Uses JSON policies similar to IAM.
+
+---
+
+## Pre-Signed URL
+
+A temporary URL that allows secure access to a private file.
+
+Example:
+
+```text
+Private S3 File
+        |
+Pre-Signed URL
+        |
+User Downloads File
+```
+
+Commonly used in Spring Boot applications.
+
+---
+
+## Static Website Hosting
+
+S3 can host static websites.
+
+Supports:
+
+* HTML
+* CSS
+* JavaScript
+
+Example:
+
+```text
+index.html
+style.css
+app.js
+```
+
+No server required.
+
+---
+
+## Security Features
+
+### Encryption
+
+Protects stored data.
+
+Types:
+
+1. SSE-S3
+2. SSE-KMS
+3. Client-Side Encryption
+
+---
+
+### Access Control
+
+Using:
+
+* IAM Policies
+* Bucket Policies
+* ACLs (less commonly used)
+
+---
+
+## Real-World Example
+
+Spring Boot Application:
+
+```text
+User Uploads Image
+        |
+Spring Boot API
+        |
+        v
+      S3 Bucket
+        |
+Store Image URL in RDS
+```
+
+Instead of storing images in database, store them in S3.
+
+---
+
+## S3 vs EBS
+
+| S3                  | EBS                 |
+| ------------------- | ------------------- |
+| Object Storage      | Block Storage       |
+| Stores Files        | Stores Disk Blocks  |
+| Independent Service | Attached to EC2     |
+| Unlimited Scaling   | Limited to Instance |
+
+---
+
+## Best Practices
+
+1. Enable Versioning.
+2. Use Lifecycle Rules.
+3. Keep Buckets Private by Default.
+4. Encrypt Sensitive Data.
+5. Use Pre-Signed URLs for secure downloads.
+6. Store backups in Glacier classes.
+
+---
+
+## Interview Questions
+
+### What is S3?
+
+AWS object storage service used to store files.
+
+### What is a Bucket?
+
+A container used to store objects in S3.
+
+### What is Versioning?
+
+Maintains multiple versions of the same file.
+
+### What is a Pre-Signed URL?
+
+A temporary URL used to access private S3 objects securely.
+
+### Difference Between S3 and EBS?
+
+S3 stores objects/files, whereas EBS provides block storage attached to EC2.
+
+---
+
+## Quick Revision
+
+S3 = Object Storage
+
+Bucket        → Container
+Object        → File
+Key           → File Path
+Versioning    → Multiple File Versions
+Lifecycle     → Automatic Cost Optimization
+Bucket Policy → Access Control
+Pre-Signed URL→ Temporary Secure Access
+
+Storage Classes:
+Standard
+Standard-IA
+Glacier Instant Retrieval
+Glacier Deep Archive
+
+Common Uses:
+
+* File Uploads
+* Image Storage
+* Backups
+* Static Websites
+* Logs
+
+```
+```
+

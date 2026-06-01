@@ -897,3 +897,22 @@ Amazon S3 is a highly scalable, secure, and durable object storage service provi
 
 * **Primary Use Cases:** S3 is the industry standard for creating reliable data backups, archiving long-term compliance records, hosting static websites, and building massive data lakes to power machine learning and analytics.
 
+
+
+
+### **Amazon EC2 (Elastic Compute Cloud)**
+
+Amazon EC2 हे AWS मधील एक अत्यंत लोकप्रिय आणि महत्त्वाचे service आहे, जे cloud मध्ये resizable compute capacity म्हणजेच virtual servers पुरवते. सोप्या भाषेत सांगायचे तर, तुम्ही internet द्वारे cloud मध्ये स्वतःचा एक virtual computer भाड्याने घेऊ शकता आणि त्यावर तुमचे applications run करू शकता.
+
+* **How It Works:** तुम्ही तुमच्या गरजेनुसार CPU, RAM, आणि storage निवडून काही मिनिटांत एक Instance (virtual machine) तयार करू शकता. यावर तुम्ही तुमच्या आवडीचा Operating System (जसे की Linux किंवा Windows) आणि software stack configure करू शकता.
+* **Core Benefits:**
+* **Scalability:** ट्रॅफिक वाढल्यास तुम्ही Auto Scaling चा वापर करून तुमच्या servers ची संख्या स्वयंचलितपणे (automatically) वाढवू शकता किंवा कमी करू शकता.
+* **Cost-Effective:** यामध्ये pay-as-you-go मॉडेल असते, म्हणजेच तुम्ही जितका वेळ instance active ठेवता फक्त तितक्याच वेळेचा charge तुम्हाला द्यावा लागतो.
+* **Full Control:** तुम्हाला तुमच्या virtual server चा पूर्ण administrative किंवा root access मिळतो, ज्यामुळे तुम्ही ते तुमच्या प्रोजेक्टच्या गरजेनुसार configure करू शकता.
+
+
+
+**Real-world project use:**
+एका E-commerce website प्रोजेक्टमध्ये, जेव्हा एखादा मोठा festival sale असतो तेव्हा अचानक येणाऱ्या प्रचंड traffic ला handle करण्यासाठी Amazon EC2 instances चा वापर Auto Scaling सोबत केला जातो, ज्यामुळे server वर लोड न येता website crash न होता smooth चालते आणि नंतर ट्रॅफिक कमी झाल्यावर जास्तीचे instances automatic delete होतात.
+
+Cloud computing च्या जगात स्वतःचे application किंवा backend deploy करण्यासाठी आणि infrastructure वर पूर्ण नियंत्रण मिळवण्यासाठी EC2 हा एक अत्यंत पायाभूत, लवचिक आणि विश्वासार्ह पर्याय मानला जातो जो कोणत्याही आधुनिक web application ला यशस्वीरीत्या चालवू शकतो.

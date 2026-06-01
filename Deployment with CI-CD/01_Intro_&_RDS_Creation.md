@@ -5,6 +5,7 @@
 
 * AWS follows a pay-as-you-go model.
   Users pay only for the resources they use.
+* AWS provides scalable infrastructure 
 
 * It helps developers deploy applications without buying physical hardware.
   Applications can run from anywhere using internet-based cloud servers.

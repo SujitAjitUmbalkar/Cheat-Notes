@@ -1032,3 +1032,140 @@ AWS Systems Manager (SSM)
 ### Real Industry Usage
 
 Many companies **disable SSH access completely** and use **SSM Session Manager** to access EC2 instances securely. This is a common DevOps practice.
+
+
+# AWS Rare but Important Service: AWS EventBridge
+
+## What is EventBridge?
+
+**EventBridge** is AWS's event bus service.
+
+It listens for events and automatically triggers actions.
+
+---
+
+## Real Example
+
+```text
+User uploads file to S3
+         ↓
+EventBridge detects event
+         ↓
+Triggers Lambda
+         ↓
+Processes file
+```
+
+---
+
+## Why Use It?
+
+* Event-driven architecture
+* Automates workflows
+* Connects AWS services
+* Reduces manual coding
+
+---
+
+## Important Components
+
+### 1. Event
+
+Something happens.
+
+Examples:
+
+* EC2 started
+* S3 file uploaded
+* RDS backup completed
+
+---
+
+### 2. Rule
+
+Defines when to react.
+
+Example:
+
+```text
+IF file uploaded to S3
+THEN trigger Lambda
+```
+
+---
+
+### 3. Target
+
+Action to perform.
+
+Targets can be:
+
+* Lambda
+* ECS
+* SQS
+* SNS
+* Step Functions
+
+---
+
+## Common Use Cases
+
+### Auto Notification
+
+```text
+EC2 Stopped
+      ↓
+EventBridge
+      ↓
+SNS Email
+```
+
+---
+
+### Automated Deployment
+
+```text
+Code Commit
+      ↓
+EventBridge
+      ↓
+CodePipeline
+```
+
+---
+
+## Interview One-Liner
+
+**EventBridge captures events from AWS services and routes them to targets for automated processing.**
+
+---
+
+## Short Notes
+
+```text
+AWS EventBridge
+
+• Event-driven service
+• Event = Something happened
+• Rule = Condition
+• Target = Action
+• Connects AWS services
+• Triggers Lambda, ECS, SQS, SNS etc.
+• Used for automation and integrations
+```
+
+### Quick Memory Trick
+
+```text
+Event Happens
+      ↓
+EventBridge Catches
+      ↓
+Rule Matches
+      ↓
+Target Executes
+```
+
+**Rare Service Learned:** ✅ EventBridge
+
+**Next rare service suggestion:** AWS Step Functions (very useful in microservices and interviews).

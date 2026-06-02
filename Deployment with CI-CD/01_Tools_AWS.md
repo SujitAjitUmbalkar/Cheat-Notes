@@ -935,3 +935,100 @@ Amazon RDS is a managed service that makes it easy to set up, operate, and scale
 In a banking web application, Amazon RDS is utilized to securely manage structured financial transactions, user accounts, and balance records. It ensures strict data consistency and automatic failover capabilities, guaranteeing that customer financial data is always accurate and highly available even during localized hardware failures.
 
 Understanding these core cloud services is essential for building scalable software, and leveraging managed databases like RDS significantly reduces operational overhead by allowing you to focus entirely on writing business logic rather than dealing with server maintenance. If you want to explore how these cloud components integrate with your specific backend architectures or need details on any other services, just let me know and we can dive deeper into the technical implementations.
+
+
+# AWS Rare but Important Service: AWS Systems Manager (SSM)
+
+## What is SSM?
+
+AWS Systems Manager helps you **manage, monitor, and automate EC2 instances and servers** from a central place.
+
+---
+
+## Why Use It?
+
+* Connect to EC2 without SSH
+* Run commands on multiple servers
+* Store configuration and secrets
+* Automate maintenance tasks
+* Patch operating systems automatically
+
+---
+
+## Important Features
+
+### 1. Session Manager ⭐
+
+Login to EC2 directly from AWS Console.
+
+```text
+AWS Console
+     ↓
+Session Manager
+     ↓
+EC2 Instance
+```
+
+No SSH key required.
+
+---
+
+### 2. Run Command
+
+Execute commands on many servers at once.
+
+Example:
+
+```bash
+sudo yum update -y
+```
+
+Runs on multiple EC2 instances.
+
+---
+
+### 3. Parameter Store
+
+Stores:
+
+* Database passwords
+* API keys
+* Environment variables
+
+Example:
+
+```text
+/db/password
+/api/key
+```
+
+---
+
+### 4. Patch Manager
+
+Automatically updates OS patches.
+
+---
+
+## Interview One-Liner
+
+**SSM is a service used to manage, automate, patch, and securely access EC2 instances without SSH.**
+
+---
+
+## Short Notes
+
+```text
+AWS Systems Manager (SSM)
+
+• Manage EC2 from one place
+• Session Manager = Login without SSH
+• Run Command = Execute commands remotely
+• Parameter Store = Store secrets/configs
+• Patch Manager = Automatic updates
+• Improves security and automation
+```
+
+### Real Industry Usage
+
+Many companies **disable SSH access completely** and use **SSM Session Manager** to access EC2 instances securely. This is a common DevOps practice.

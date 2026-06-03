@@ -1350,3 +1350,18 @@ Pay only when code executes
 Triggered by S3, API Gateway, SQS, SNS, EventBridge
 
 Keywords: Function, Trigger, Event, Execution Role
+
+--- 
+AWS VPC (Very Important)
+Private network inside AWS
+Control networking and security
+
+Sub-components
+
+VPC
+Subnet
+Internet Gateway
+NAT Gateway
+Route Table
+Security Group
+NACL

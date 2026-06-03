@@ -1365,3 +1365,8 @@ NAT Gateway
 Route Table
 Security Group
 NACL
+
+
+Auto Scaling
+Automatically adds/removes EC2 instances
+Maintains application availability

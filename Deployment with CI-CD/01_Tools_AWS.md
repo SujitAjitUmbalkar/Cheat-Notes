@@ -1341,13 +1341,12 @@ Many Services
 Step Functions
       ↓
 One Workflow
-```
 
-✅ Rare Services Learned:
 
-* SSM
-* EventBridge
-* Step Functions
+AWS Lambda
+Serverless compute service
+Run code without managing servers
+Pay only when code executes
+Triggered by S3, API Gateway, SQS, SNS, EventBridge
 
-Next rare service: **AWS Secrets Manager** (very common in production systems).
-
+Keywords: Function, Trigger, Event, Execution Role

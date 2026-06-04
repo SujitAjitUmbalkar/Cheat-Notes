@@ -1414,3 +1414,47 @@ Deploy a Spring Boot application in a Docker container on ECS without creating o
 * Auto Scaling
 * Pay-as-you-go
 * Ideal for microservices and containerized applications
+
+## AWS App Runner
+
+### What is it?
+
+AWS App Runner is a fully managed service that deploys web applications and APIs directly from source code or Docker images.
+
+### Why use it?
+
+* No need to manage servers, load balancers, or scaling.
+* Quick deployment of Spring Boot, Node.js, Python, and other applications.
+* Automatically handles HTTPS, scaling, and monitoring.
+
+### Features
+
+* Deploy from GitHub or ECR.
+* Automatic scaling.
+* Built-in load balancing.
+* Secure HTTPS endpoint.
+
+### Use Case
+
+Deploy a Spring Boot REST API directly from a Docker image stored in ECR with minimal AWS configuration.
+
+### Important Terms
+
+* Service
+* Source Repository
+* Auto Scaling
+* Instance Configuration
+
+### Interview One-Liner
+
+> AWS App Runner is a fully managed service that automatically builds, deploys, and scales web applications and APIs.
+
+### Short Notes
+
+* Fully Managed
+* Deploy from GitHub/ECR
+* Auto Scaling
+* Built-in HTTPS
+* No Infrastructure Management
+* Faster than setting up ECS + Load Balancer for simple applications
+

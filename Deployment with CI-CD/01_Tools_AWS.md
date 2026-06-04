@@ -1370,3 +1370,47 @@ NACL
 Auto Scaling
 Automatically adds/removes EC2 instances
 Maintains application availability
+
+
+## AWS Fargate
+
+### What is it?
+
+AWS Fargate is a **serverless compute engine for containers** that works with ECS and EKS.
+
+### Why use it?
+
+* No need to manage EC2 servers.
+* AWS automatically handles infrastructure.
+* Focus only on your application and containers.
+
+### Features
+
+* Serverless container execution.
+* Automatic scaling.
+* Pay only for CPU and memory used.
+* Better security through task isolation.
+
+### Use Case
+
+Deploy a Spring Boot application in a Docker container on ECS without creating or managing EC2 instances.
+
+### Important Terms
+
+* Task
+* Task Definition
+* Cluster
+* CPU & Memory Allocation
+
+### Interview One-Liner
+
+> AWS Fargate allows us to run Docker containers on ECS/EKS without provisioning or managing EC2 instances.
+
+### Short Notes
+
+* Serverless Containers
+* Works with ECS & EKS
+* No EC2 management
+* Auto Scaling
+* Pay-as-you-go
+* Ideal for microservices and containerized applications

@@ -1499,3 +1499,41 @@ You upload your code, and Lambda automatically executes it when triggered.
 ### Interview One-Liner
 
 **AWS Lambda is a serverless service that runs code in response to events without requiring server management.**
+
+
+## AWS Service: AWS Step Functions
+
+### What is AWS Step Functions?
+
+AWS Step Functions is a service used to **orchestrate multiple AWS services and workflows**.
+
+It allows you to define a sequence of steps and manage their execution automatically.
+
+### Key Features
+
+* Visual workflow designer
+* Error handling and retries
+* Integration with Lambda, ECS, SQS, SNS, DynamoDB, etc.
+* State machine-based execution
+
+### Example
+
+Online Order Processing:
+
+1. Receive order
+2. Process payment
+3. Check inventory
+4. Ship product
+5. Send notification
+
+Step Functions coordinates all these steps.
+
+### Benefits
+
+* Reduces complex application logic
+* Built-in fault tolerance
+* Easy monitoring of workflow execution
+
+### Interview One-Liner
+
+**AWS Step Functions is a workflow orchestration service that coordinates multiple AWS services into automated business processes.**

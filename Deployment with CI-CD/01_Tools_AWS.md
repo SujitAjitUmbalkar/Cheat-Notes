@@ -1458,3 +1458,44 @@ Deploy a Spring Boot REST API directly from a Docker image stored in ECR with mi
 * No Infrastructure Management
 * Faster than setting up ECS + Load Balancer for simple applications
 
+
+
+## AWS Service: AWS Lambda
+
+### What is AWS Lambda?
+
+AWS Lambda is a **serverless compute service** that lets you run code without managing servers.
+
+You upload your code, and Lambda automatically executes it when triggered.
+
+### Key Features
+
+* No server management
+* Automatic scaling
+* Pay only for execution time
+* Supports Java, Python, Node.js, C#, Go, etc.
+
+### Common Triggers
+
+* S3 file upload
+* API Gateway request
+* DynamoDB changes
+* SQS messages
+* Scheduled events (cron jobs)
+
+### Example
+
+1. User uploads an image to S3.
+2. S3 triggers Lambda.
+3. Lambda resizes the image.
+4. Resized image is saved back to S3.
+
+### Benefits
+
+* Cost-effective for small workloads
+* Scales automatically
+* Easy event-driven architecture
+
+### Interview One-Liner
+
+**AWS Lambda is a serverless service that runs code in response to events without requiring server management.**

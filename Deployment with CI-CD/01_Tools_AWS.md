@@ -1537,3 +1537,27 @@ Step Functions coordinates all these steps.
 ### Interview One-Liner
 
 **AWS Step Functions is a workflow orchestration service that coordinates multiple AWS services into automated business processes.**
+
+
+### AWS App Runner
+
+**Purpose:** Deploy web applications and APIs without managing servers.
+
+**Uses:**
+
+* Host Spring Boot applications
+* Deploy REST APIs
+* Run containerized applications
+
+**Key Features:**
+
+* Automatic scaling
+* HTTPS by default
+* CI/CD integration
+* Simple deployment from source code or container image
+
+**Example:**
+Deploy a Spring Boot application directly from a GitHub repository, and App Runner automatically builds, deploys, and scales it.
+
+**Short Note:**
+AWS App Runner is a fully managed service that makes it easy to deploy and run web applications and APIs without managing infrastructure.

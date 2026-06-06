@@ -1561,3 +1561,28 @@ Deploy a Spring Boot application directly from a GitHub repository, and App Runn
 
 **Short Note:**
 AWS App Runner is a fully managed service that makes it easy to deploy and run web applications and APIs without managing infrastructure.
+
+
+### AWS Glue
+
+**Purpose:** ETL (Extract, Transform, Load) service for data processing.
+
+**Uses:**
+
+* Prepare data for analytics
+* Convert data formats
+* Move data between databases and data lakes
+
+**Key Features:**
+
+* Serverless
+* Automatic schema discovery (Data Catalog)
+* ETL job creation
+* Integration with S3, RDS, Redshift, Athena
+
+**Example:**
+Read sales data from S3, clean and transform it, then load it into a data warehouse for reporting.
+
+**Short Note:**
+AWS Glue is a serverless data integration service used to discover, transform, and prepare data for analytics and machine learning workloads.
+

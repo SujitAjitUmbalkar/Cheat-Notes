@@ -1,0 +1,390 @@
+
+# Java 8 Lambda & Streams -
+
+## 1. Lambda Expression
+
+### Definition
+
+Lambda Expression is a short way to implement a Functional Interface.
+
+### Syntax
+
+```java
+(parameters) -> { logic }
+```
+
+### Examples
+
+```java
+() -> System.out.println("Hello");
+
+name -> System.out.println(name);
+
+(a,b) -> a + b;
+```
+
+### Benefits
+
+* Less code
+* Improves readability
+* Used heavily with Streams
+
+---
+
+## 2. Functional Interface
+
+### Definition
+
+An interface having exactly one abstract method.
+
+```java
+@FunctionalInterface
+interface Greeting {
+    void sayHello();
+}
+```
+
+### Rules
+
+* Only one abstract method
+* Can have multiple default methods
+* Can have multiple static methods
+
+### Examples
+
+* Runnable
+* Comparator
+* Predicate
+* Function
+* Consumer
+* Supplier
+
+---
+
+## 3. Built-in Functional Interfaces
+
+| Interface     | Input | Output  | Method   |
+| ------------- | ----- | ------- | -------- |
+| Predicate<T>  | Yes   | boolean | test()   |
+| Consumer<T>   | Yes   | No      | accept() |
+| Supplier<T>   | No    | Yes     | get()    |
+| Function<T,R> | Yes   | Yes     | apply()  |
+
+### Examples
+
+```java
+Predicate<Integer> p = n -> n > 10;
+
+Consumer<String> c = name -> System.out.println(name);
+
+Supplier<String> s = () -> "Hello";
+
+Function<String,Integer> f = str -> str.length();
+```
+
+---
+
+# STREAM API
+
+## Definition
+
+Stream API is used to process collections in a functional style.
+
+```java
+list.stream()
+```
+
+---
+
+## Stream Pipeline
+
+```text
+Collection
+    ↓
+stream()
+    ↓
+filter()
+    ↓
+map()
+    ↓
+collect()
+```
+
+---
+
+## Important Methods
+
+### filter()
+
+Used to select elements.
+
+```java
+.filter(n -> n > 10)
+```
+
+Uses: Predicate
+
+---
+
+### map()
+
+Used to transform elements.
+
+```java
+.map(n -> n * 2)
+```
+
+Uses: Function
+
+---
+
+### forEach()
+
+Used to perform action on each element.
+
+```java
+.forEach(System.out::println)
+```
+
+Uses: Consumer
+
+---
+
+### collect()
+
+Used to collect result.
+
+```java
+.collect(Collectors.toList())
+```
+
+Returns List
+
+---
+
+### count()
+
+Returns total elements.
+
+```java
+.count()
+```
+
+Returns long
+
+---
+
+### findFirst()
+
+Returns first element.
+
+```java
+.findFirst()
+```
+
+Returns Optional<T>
+
+---
+
+### sorted()
+
+Ascending order.
+
+```java
+.sorted()
+```
+
+Descending:
+
+```java
+.sorted(Comparator.reverseOrder())
+```
+
+---
+
+### distinct()
+
+Removes duplicates.
+
+```java
+.distinct()
+```
+
+---
+
+### limit()
+
+Returns first N elements.
+
+```java
+.limit(3)
+```
+
+---
+
+## Intermediate vs Terminal Operations
+
+### Intermediate Operations
+
+Return Stream.
+
+* filter()
+* map()
+* sorted()
+* distinct()
+* limit()
+
+### Terminal Operations
+
+End Stream.
+
+* forEach()
+* collect()
+* count()
+* findFirst()
+
+---
+
+## Stream Rules
+
+### Rule 1
+
+One Stream object can be consumed only once.
+
+```java
+Stream<Integer> s = list.stream();
+s.count();
+s.count(); // Error
+```
+
+### Rule 2
+
+A Collection can create multiple Streams.
+
+```java
+list.stream().count();
+
+list.stream().forEach(System.out::println);
+```
+
+Valid.
+
+---
+
+## Lazy Evaluation
+
+Processing starts only after Terminal Operation.
+
+```java
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2);
+```
+
+Nothing executes.
+
+```java
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+```
+
+Executes.
+
+---
+
+# Method Reference (::)
+
+### Definition
+
+Short form of Lambda.
+
+### Examples
+
+```java
+System.out::println
+
+String::toUpperCase
+
+String::length
+
+Employee::getName
+
+Employee::getSalary
+```
+
+### Conversion
+
+```java
+name -> name.length()
+```
+
+↓
+
+```java
+String::length
+```
+
+---
+
+# Optional
+
+### Definition
+
+Container object that may or may not contain a value.
+
+### Create
+
+```java
+Optional.of("Sujeet");
+
+Optional.empty();
+```
+
+### Important Methods
+
+| Method        | Purpose           |
+| ------------- | ----------------- |
+| of()          | Create Optional   |
+| empty()       | Empty Optional    |
+| get()         | Get value         |
+| isPresent()   | Check value       |
+| ifPresent()   | Execute if exists |
+| orElse()      | Default value     |
+| orElseThrow() | Throw exception   |
+
+### Example
+
+```java
+Optional<String> name =
+    Optional.empty();
+
+System.out.println(
+    name.orElse("Guest")
+);
+```
+
+Output:
+
+```java
+Guest
+```
+
+---
+
+# Most Important Interview Flow
+
+```java
+nums.stream()
+    .distinct()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .sorted()
+    .collect(Collectors.toList());
+```
+
+Flow:
+
+Distinct → Filter → Transform → Sort → Collect
+

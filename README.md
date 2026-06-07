@@ -1,7 +1,9 @@
 # 📚 Collection of Notes
 
 This repository is a complete collection of **programming notes, cheat sheets, summaries, and learning material** for various programming languages and computer science subjects.  
-It is designed for **quick revision, exam preparation, interview practice, and concept clarity**.
+It is designed for **quick revision, exam preparation, interview practice, and concept clarity**
+.
+.
 
 ---
 

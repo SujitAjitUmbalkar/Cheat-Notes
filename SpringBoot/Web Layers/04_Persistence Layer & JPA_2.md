@@ -233,23 +233,6 @@ Steps:
 
 Then click Connect.
 
-You can see tables and run SQL queries.
-
-In Previous commit , you would notice that 404 error was occuring , because (In Spring Boot 4, a separate configuration class is needed to enable the H2 Console because some features are no longer auto-registered for security and clarity. The H2 console runs as a servlet, and newer Spring Boot versions require explicit servlet registration instead of hidden defaults. This config class manually registers the H2ConsoleServlet and maps it to /h2-console. It ensures the console is available only when you explicitly allow it. This approach gives developers more control over what gets exposed. Older Spring Boot versions did this automatically, but newer versions follow a more explicit and secure configuration model.) , thats why created class H2ConsoleConfig (This is a Spring @Configuration class used to enable the H2 database web console in a Spring Boot application. It defines a ServletRegistrationBean<JakartaWebServlet> bean that registers the H2 web servlet with the Spring context. The h2Servlet() method maps the H2 console to the /h2-console/* URL and ensures it is loaded at application startup using setLoadOnStartup(1). ServletRegistrationBean is used to programmatically register servlets in Spring Boot without web.xml configuration. JakartaWebServlet is the servlet provided by the H2 database to render the web-based console UI. This configuration requires the com.h2database:h2 dependency along with spring-boot-starter-web.
-
-```
-@Configuration
-public class H2ConsoleConfig {
-
-    @Bean
-    public ServletRegistrationBean<JakartaWebServlet> h2Servlet() {
-        ServletRegistrationBean<JakartaWebServlet> servlet =
-                new ServletRegistrationBean<>(new JakartaWebServlet(), "/h2-console/*");
-        servlet.setLoadOnStartup(1);
-        return servlet;
-    }
-}
-```
 ---
 
 # 7️⃣ JPA Repository Interfaces

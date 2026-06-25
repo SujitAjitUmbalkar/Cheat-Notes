@@ -1,4 +1,4 @@
-# 🚀 Spring Boot Complete Notes (MVC + JPA + Validation + Exception Handling)
+# 🚀 Spring Boot Annotations
 
 ---
 🔷 Spring Beans – Complete Single Table

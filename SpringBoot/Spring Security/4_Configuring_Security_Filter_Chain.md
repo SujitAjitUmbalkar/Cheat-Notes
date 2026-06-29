@@ -1,4 +1,4 @@
-### Why configure `SecurityFilterChain`?
+# Why configure `SecurityFilterChain`?
 
 In **Spring Security**, `SecurityFilterChain` is used to **define security rules for HTTP requests**.
 
@@ -11,7 +11,54 @@ We configure `SecurityFilterChain` when we want to:
 * Apply role-based access (`hasRole`)
 * Choose login type (form login, basic auth, JWT)
 
-So it **customizes how security works for requests**.
+  ---
+ **"Default `SecurityFilterChain` vs Custom `SecurityFilterChain`"**
+
+## **Table 1: Default `SecurityFilterChain` (Spring Security Configures Automatically)**
+
+| Purpose            | What Spring Security configures by default | Internal Default                                |
+| ------------------ | ------------------------------------------ | ----------------------------------------------- |
+| URL Authorization  | Protects all URLs                          | `anyRequest().authenticated()`                  |
+| Authentication     | Requires login for every request           | `.authenticated()`                              |
+| Login              | Default HTML login page                    | `.formLogin(Customizer.withDefaults())`         |
+| Logout             | Default `/logout` endpoint                 | `.logout(Customizer.withDefaults())`            |
+| HTTP Basic         | Enables HTTP Basic Authentication          | `.httpBasic(Customizer.withDefaults())`         |
+| CSRF               | Enables CSRF protection                    | `.csrf(Customizer.withDefaults())`              |
+| Session            | Uses stateful HTTP Session                 | Default `SessionCreationPolicy.IF_REQUIRED`     |
+| Headers            | Adds default security headers              | `.headers(Customizer.withDefaults())`           |
+| Exception Handling | Uses default 401/403 handling              | `.exceptionHandling(Customizer.withDefaults())` |
+| Request Matching   | Applies rules to all requests              | `.anyRequest()`                                 |
+
+
+## **Table 2: What We Configure in Our Own `SecurityFilterChain`**
+
+| Purpose            | Why configure it?                     | Main API / Code Used                                       |
+| ------------------ | ------------------------------------- | ---------------------------------------------------------- |
+| Enable security    | Replace default configuration         | `@Bean SecurityFilterChain filterChain(HttpSecurity http)` |
+| URL Authorization  | Decide public/protected URLs          | `authorizeHttpRequests()`                                  |
+| Authentication     | Require login where needed            | `.authenticated()`                                         |
+| Authorization      | Restrict by roles/authorities         | `.hasRole()`, `.hasAuthority()`                            |
+| Login              | Custom login page/settings            | `.formLogin()`, `.loginPage()`                             |
+| Logout             | Custom logout behavior                | `.logout()`                                                |
+| CSRF               | Disable/customize CSRF                | `.csrf()`                                                  |
+| CORS               | Configure cross-origin requests       | `.cors()`                                                  |
+| Session            | Configure stateless (JWT) or stateful | `.sessionManagement()`                                     |
+| HTTP Basic         | Enable/disable Basic Auth             | `.httpBasic()`                                             |
+| JWT                | Add JWT filter                        | `.addFilterBefore()`                                       |
+| Custom Filters     | Add/remove filters                    | `.addFilterBefore()`, `.addFilterAfter()`                  |
+| Exception Handling | Custom 401/403 responses              | `.exceptionHandling()`                                     |
+| Request Matching   | Different rules for URLs              | `.requestMatchers()`                                       |
+| Headers            | Customize security headers            | `.headers()`                                               |
+| Remember-Me        | Enable remember-me                    | `.rememberMe()`                                            |
+| OAuth2             | Configure OAuth2 login                | `.oauth2Login()`, `.oauth2ResourceServer()`                |
+| Disable Defaults   | Disable default features              | `.disable()`                                               |
+| Build              | Build final chain                     | `http.build()`                                             |
+
+
+### In one sentence
+
+> **`SecurityFilterChain` is the central configuration where we define all security rules—who can access what, how users authenticate, and how requests are protected.**
+ **customizes how security works for requests**.
 
 ---
 

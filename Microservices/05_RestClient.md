@@ -693,7 +693,19 @@ retrieve()
 Read Response
 ```
 
+---
+
+
 Receive Java Object
-```
 
 This sequence is enough to remember the complete `RestClient` workflow during coding or interviews.
+
+
+| Scenario                  | RestClient URI                                 | Who finds the service? | Gateway Used? |
+| ------------------------- | ---------------------------------------------- | ---------------------- | ------------- |
+| No Gateway + Discovery    | `orderService.getUri()+"/api/v1/orders/hello"` | `DiscoveryClient`      | ❌             |
+| Gateway + Discovery       | `http://localhost:8080/api/v1/orders/hello`    | Gateway (via Eureka)   | ✅             |
+| No Gateway + No Discovery | `http://localhost:8081/api/v1/orders/hello`    | No one (hardcoded URL) | ❌             |
+
+
+Interview Tip: In most microservice architectures, external clients (browser, mobile apps, Postman) call the API Gateway, while internal microservice-to-microservice communication usually bypasses the Gateway and uses service discovery + load balancing directly. This reduces latency and avoids making the Gateway a bottleneck for internal traffic.

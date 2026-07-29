@@ -1,181 +1,368 @@
-# Multi-Stage Builds (Docker) — Complete Notes
-
-A **multi-stage build** allows you to use **multiple `FROM` statements** in one Dockerfile.
-
-Each stage has its own purpose.
-
-For a Spring Boot project:
-
-* **Stage 1:** Build the JAR using Maven.
-* **Stage 2:** Copy only the JAR into a lightweight runtime image.
-
-This makes the final image much smaller, cleaner, and more secure.
+# Docker Multi-Stage Builds (Spring Boot) – Cheat Notes
 
 ---
 
-# Why do we need Multi-Stage Builds?
+# 1. What is a Multi-Stage Build?
 
-Without multi-stage builds, if you build inside Docker, the final image contains:
+* A Dockerfile with **multiple `FROM`** instructions.
+* Each `FROM` creates a separate **build stage**.
+* Usually:
 
-* Maven
-* Source code (`src`)
-* `.git`
-* Build cache
-* `pom.xml`
-* Compilers
-* JDK tools
-* Final JAR
+  * **Stage 1 → Build** the application.
+  * **Stage 2 → Run** the application.
+
+---
+
+# 2. Why use Multi-Stage Builds?
+
+* Docker creates the JAR automatically.
+* No need to run `mvn clean package` manually.
+* Final image contains only what is required to run.
+* No Maven, source code or build tools in the final image.
+* Smaller, cleaner and more secure images.
+* Industry standard.
+
+---
+
+# 3. One-Stage vs Multi-Stage
+
+## One-Stage
 
 ```text
-Final Image
-│
-├── Maven
-├── Source Code
-├── pom.xml
-├── Target
-├── JDK
-└── app.jar
+You
+ │
+mvn clean package
+ │
+Creates app.jar
+ │
+docker build
+ │
+Copies app.jar
+ │
+docker run
 ```
 
-Image becomes large.
+Commands
+
+```bash
+mvn clean package
+
+docker build -t my-app .
+
+docker run -p 8080:8080 my-app
+```
 
 ---
 
-With Multi-Stage Build
+## Multi-Stage
 
 ```text
-Builder Stage
-│
-├── Maven
-├── Source Code
-├── JDK
-└── Builds app.jar
-        │
-        ▼
-Runtime Stage
-│
-├── JRE
-└── app.jar
+You
+ │
+docker build
+ │
+Docker
+ │
+mvn clean package
+ │
+Creates app.jar
+ │
+Copies app.jar
+ │
+docker run
 ```
 
-Only the JAR is copied.
+Commands
 
-Everything else is discarded.
+```bash
+docker build -t my-app .
 
----
-
-# Advantages
-
-* Smaller image
-* Faster download
-* Faster deployment
-* Better security
-* No source code inside image
-* No Maven inside image
-* No unnecessary build tools
-* Industry standard
-
----
-
-# How it Works
-
-## Stage 1
-
-```dockerfile
-FROM maven:3.9.11-eclipse-temurin-21 AS builder
+docker run -p 8080:8080 my-app
 ```
 
-Creates a temporary container.
+---
 
-Purpose:
+# 4. Difference
 
-Build the project.
+| One Stage                        | Multi Stage              |
+| -------------------------------- | ------------------------ |
+| You create JAR                   | Docker creates JAR       |
+| Run Maven manually               | Docker runs Maven        |
+| Simpler                          | Industry standard        |
+| Final image = JRE + JAR          | Final image = JRE + JAR  |
+| Requires Maven installed locally | Docker handles the build |
+
+> **If your one-stage Dockerfile already uses a JRE image, the final image size is usually almost the same. The biggest benefit is automation and a cleaner build process.**
 
 ---
 
-## Stage 2
-
-```dockerfile
-FROM eclipse-temurin:21-jre
-```
-
-Creates another fresh image.
-
-Purpose:
-
-Run the application.
-
----
-
-Docker copies only the required files.
-
----
-
-# Workflow
+# 5. How Docker Creates the JAR
 
 ```text
 Spring Boot Project
-│
-├── src
-├── pom.xml
-└── Dockerfile
         │
-        ▼
-Stage 1
-(Maven Image)
+docker build
         │
-        ▼
-mvn clean package
+Builder Stage
         │
-Creates
-target/app.jar
+RUN mvn clean package
         │
-        ▼
-Stage 2
-(JRE Image)
-        │
-Copies only
-app.jar
-        │
-        ▼
-Final Docker Image
+Docker creates app.jar
+```
+
+The JAR is created **inside the builder stage**, not on your local machine.
+
+---
+
+# 6. What Happens Internally?
+
+```text
+Dockerfile
+      │
+      ▼
+Builder Image
+      │
+Temporary Build Container
+      │
+RUN mvn clean package
+      │
+Creates app.jar
+      │
+Save Image Layer
+      │
+Delete Temporary Container
+```
+
+Then
+
+```text
+Runtime Image
+      │
+Temporary Build Container
+      │
+COPY app.jar
+      │
+Save Final Image
+      │
+Delete Temporary Container
 ```
 
 ---
 
-# Complete Dockerfile
+# 7. Does Docker Create Two Images?
+
+During build:
+
+```text
+Builder Stage
+        │
+        ▼
+Runtime Stage
+```
+
+✔ Internally, yes.
+
+After build:
+
+```text
+Only Runtime Image is kept
+```
+
+The builder stage is only used to produce the final image unless you explicitly build or tag it.
+
+---
+
+# 8. Does Builder Stage Create a Container?
+
+Yes.
+
+Docker creates **temporary build containers** to execute instructions like:
 
 ```dockerfile
-# ----------------------------
-# Stage 1 : Build the Project
-# ----------------------------
+RUN
+COPY
+WORKDIR
+```
 
-# Maven image with JDK 21
+After the step finishes:
+
+* Save changes to the image layer.
+* Delete the temporary build container.
+
+Only `docker run` creates the container that runs your application.
+
+---
+
+# 9. Does the Image Store Data?
+
+### Image stores
+
+* app.jar
+* Configuration files
+* Static resources
+* Libraries
+
+### Image does NOT store
+
+* Logs
+* Runtime files
+* Database records
+* Uploaded files
+* Temporary files
+
+Those belong to the **container**.
+
+---
+
+# 10. Why Isn't the Final Image Much Smaller?
+
+If both Dockerfiles use:
+
+```dockerfile
+FROM eclipse-temurin:21-jre
+```
+
+then both final images contain:
+
+```text
+JRE
++
+app.jar
+```
+
+So the image size is almost the same.
+
+Multi-stage mainly automates the build and keeps the final image clean.
+
+---
+
+# 11. Multi-Stage Workflow
+
+```text
+Spring Boot Project
+        │
+docker build
+        │
+Stage 1
+(Maven + JDK)
+        │
+Creates app.jar
+        │
+COPY --from=builder
+        ▼
+Stage 2
+(JRE)
+        │
+Final Image
+        │
+docker run
+        ▼
+Container
+```
+
+---
+
+# 12. Important Dockerfile Instructions
+
+```dockerfile
+FROM maven:3.9.11-eclipse-temurin-21 AS builder
+```
+
+* Builder stage
+* Maven + JDK
+
+---
+
+```dockerfile
+WORKDIR /app
+```
+
+* Creates `/app`
+* Switches to `/app`
+
+---
+
+```dockerfile
+COPY . .
+```
+
+* Copies complete Spring Boot project.
+
+---
+
+```dockerfile
+RUN mvn clean package -DskipTests
+```
+
+* Docker builds the JAR.
+
+---
+
+```dockerfile
+FROM eclipse-temurin:21-jre
+```
+
+* Runtime stage.
+
+---
+
+```dockerfile
+COPY --from=builder /app/target/DockerApp-0.0.1-SNAPSHOT.jar app.jar
+```
+
+* Copy only the generated JAR.
+
+---
+
+```dockerfile
+EXPOSE 8080
+```
+
+* Documents the container port.
+
+---
+
+```dockerfile
+ENTRYPOINT ["java","-jar","app.jar"]
+```
+
+* Starts the Spring Boot application.
+
+---
+
+# 13. Complete Dockerfile
+
+```dockerfile
+# ============================
+# Stage 1 : Build Application
+# ============================
+
+# Maven + JDK image
 FROM maven:3.9.11-eclipse-temurin-21 AS builder
 
 # Working directory
 WORKDIR /app
 
-# Copy entire project
+# Copy complete project
 COPY . .
 
-# Build the project and create JAR
+# Docker builds the JAR
 RUN mvn clean package -DskipTests
 
-# ----------------------------
-# Stage 2 : Run the Project
-# ----------------------------
+# ============================
+# Stage 2 : Runtime Image
+# ============================
 
-# Lightweight Java Runtime
+# Lightweight JRE image
 FROM eclipse-temurin:21-jre
 
 # Working directory
 WORKDIR /app
 
-# Copy only the generated JAR from Stage 1
+# Copy only the JAR from builder stage
 COPY --from=builder /app/target/DockerApp-0.0.1-SNAPSHOT.jar app.jar
 
-# Application listens on port 8080
+# Application listens on 8080
 EXPOSE 8080
 
 # Start Spring Boot
@@ -184,224 +371,46 @@ ENTRYPOINT ["java","-jar","app.jar"]
 
 ---
 
-# Understanding Every Command
+# 14. Golden Rules
 
-## Stage 1
-
-```dockerfile
-FROM maven:3.9.11-eclipse-temurin-21 AS builder
-```
-
-Uses Maven + JDK.
-
-Names this stage **builder**.
-
----
-
-```dockerfile
-WORKDIR /app
-```
-
-Creates
-
-```
-/app
-```
-
-and moves into it.
+* One Dockerfile can have **multiple `FROM`** instructions.
+* Each `FROM` starts a **new stage**.
+* **Builder stage** → Compile/package the application.
+* **Runtime stage** → Run the application.
+* Docker creates the **JAR automatically** in the builder stage.
+* `COPY --from=builder` copies only the required files.
+* The **builder stage is temporary** unless explicitly kept.
+* `docker build` creates images using temporary build containers.
+* `docker run` creates the actual application container.
+* Images store **application files**; containers store **runtime changes**.
+* Use a **JRE** in the runtime stage instead of a **JDK**.
+* Multi-stage builds are the preferred approach for production applications.
 
 ---
 
-```dockerfile
-COPY . .
-```
-
-Copies entire Spring Boot project.
-
-```
-Local Project
-│
-├── src
-├── pom.xml
-├── mvnw
-└── target
-```
-
-↓
-
-```
-Container
-/app
-```
-
----
-
-```dockerfile
-RUN mvn clean package -DskipTests
-```
-
-Builds
-
-```
-target/app.jar
-```
-
-inside the builder container.
-
----
-
-## Stage 2
-
-```dockerfile
-FROM eclipse-temurin:21-jre
-```
-
-Fresh image.
-
-Nothing from Stage 1 exists automatically.
-
----
-
-```dockerfile
-WORKDIR /app
-```
-
-Creates
-
-```
-/app
-```
-
----
-
-```dockerfile
-COPY --from=builder /app/target/DockerApp-0.0.1-SNAPSHOT.jar app.jar
-```
-
-This is the most important command.
-
-Meaning:
-
-```
-Copy
-
-FROM
-
-Builder Stage
-
-↓
-
-/app/target/app.jar
-
-↓
-
-Current Stage
-
-↓
-
-/app/app.jar
-```
-
-Only one file is copied.
-
-Everything else is discarded.
-
----
-
-```dockerfile
-EXPOSE 8080
-```
-
-Documents the application's container port.
-
----
-
-```dockerfile
-ENTRYPOINT ["java","-jar","app.jar"]
-```
-
-Runs Spring Boot.
-
----
-
-# Visual Diagram
+## Memory Flow
 
 ```text
-                Stage 1
- ┌────────────────────────────────┐
- │ Maven + JDK                    │
- │                                │
- │ Source Code                    │
- │ pom.xml                        │
- │ mvn clean package              │
- │                                │
- │ target/app.jar                 │
- └──────────────┬─────────────────┘
-                │
-                │ COPY --from=builder
-                ▼
- ┌────────────────────────────────┐
- │ Stage 2                        │
- │                                │
- │ JRE                            │
- │ app.jar                        │
- │                                │
- │ java -jar app.jar              │
- └────────────────────────────────┘
-```
-
----
-
-# Image Size Comparison
-
-| Dockerfile               | Final Image |
-| ------------------------ | ----------: |
-| JDK + JAR                |       Large |
-| JRE + JAR                |      Medium |
-| Multi-stage + JRE        |       Small |
-| Multi-stage + Distroless |    Smallest |
-
----
-
-# When Should You Use It?
-
-| Situation              | Multi-Stage? |
-| ---------------------- | ------------ |
-| Learning Docker basics | Optional     |
-| Spring Boot production | ✅ Yes        |
-| CI/CD pipelines        | ✅ Yes        |
-| Docker Hub publishing  | ✅ Yes        |
-| Microservices          | ✅ Yes        |
-
----
-
-# Golden Rules
-
-* Use **multiple `FROM`** instructions for separate build and runtime stages.
-* Build the application in the **builder stage** (Maven + JDK).
-* Run the application in a **runtime stage** (JRE only).
-* Copy **only the final JAR** using `COPY --from=<stage>`.
-* Do **not** include source code, Maven, or build tools in the final image.
-* Prefer **JRE** over **JDK** for runtime.
-* Use **`-DskipTests`** during image builds if tests are already executed in CI/CD.
-* Name build stages (e.g., `AS builder`) for readability and maintainability.
-* Keep the runtime image as small as possible for faster pulls and better security.
-
-## Memory Trick
-
-```text
-Stage 1 → Build
-      │
-      ▼
-Creates JAR
-      │
+Spring Boot Project
+        │
+docker build
+        │
+Builder Stage (Maven + JDK)
+        │
+Docker creates app.jar
+        │
 COPY --from=builder
-      ▼
-Stage 2 → Run
-      │
-      ▼
-Small, Clean, Secure Image
+        ▼
+Runtime Stage (JRE)
+        │
+Final Image
+        │
+docker run
+        ▼
+Application Container
 ```
 
-**One-line summary:**
-**Build everything in Stage 1, copy only what you need into Stage 2.**
+### One-Line Memory Trick
+
+> **One-stage:** *You build the JAR, Docker packages it.*
+> **Multi-stage:** *Docker builds the JAR, then packages only the JAR into the final runtime image.*

@@ -255,3 +255,9 @@ ENTRYPOINT ["java","-jar","app.jar"]
 > **One-Stage:** *You build the JAR, Docker packages it.*
 
 > **Multi-Stage:** *Give Docker the whole project. Docker builds the JAR, keeps only the JAR + JRE, and creates the final runnable image.*
+>
+> Memory Rule
+JDK = Develop + Compile + Run
+JRE = Run Only
+
+Compile once with JDK → Run forever with JRE.

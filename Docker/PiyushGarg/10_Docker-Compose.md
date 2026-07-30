@@ -854,3 +854,17 @@ jdbc:mysql://mysql-db:3306/DockerVirtualDB
 ```
 
 This is very close to how a typical Spring Boot + MySQL setup is run locally using Docker Compose.
+
+1.note
+Docker Compose automatically names images like:
+
+<project-folder>-<service-name>
+
+In your case:
+
+Project Folder : DockerApp
+Service Name   : springboot
+
+↓
+
+dockerapp-springboot

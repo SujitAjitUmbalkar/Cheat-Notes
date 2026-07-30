@@ -647,3 +647,210 @@ Spring Boot ⇄ MySQL ⇄ Redis
 ## Memory Trick
 
 > **Docker = manages one container at a time. Docker Compose = manages an entire multi-container application from one YAML file with a single command.**
+
+
+## STEPS 
+
+
+* Spring Boot Application: **DockerApp**
+* Docker profile: **docker**
+* MySQL Database: **DockerVirtualDB**
+* MySQL Root Password: **Sujit@123**
+* Spring Boot listens on **8080**
+* MySQL container name: **mysql-db**
+
+Here's a clean `docker-compose.yml`.
+
+```yaml
+version: "3.9"
+
+services:
+
+  mysql:
+    image: mysql:8.4
+    container_name: mysql-db
+
+    environment:
+      MYSQL_ROOT_PASSWORD: Sujit@123
+      MYSQL_DATABASE: DockerVirtualDB
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+    networks:
+      - spring-network
+
+  springboot:
+    build: .
+    container_name: spring-app
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+    depends_on:
+      - mysql
+
+    networks:
+      - spring-network
+
+volumes:
+  mysql-data:
+
+networks:
+  spring-network:
+```
+
+---
+
+## Your `application-docker.properties`
+
+Since both containers are on the same bridge network, **don't use `localhost`**.
+
+Use:
+
+```properties
+spring.application.name=DockerApp
+
+server.port=8080
+
+spring.datasource.url=jdbc:mysql://mysql-db:3306/DockerVirtualDB
+spring.datasource.username=root
+spring.datasource.password=Sujit@123
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+```
+
+Notice:
+
+```properties
+jdbc:mysql://mysql-db:3306
+```
+
+NOT
+
+```properties
+jdbc:mysql://localhost:3307
+```
+
+because inside Docker Compose, Spring Boot reaches MySQL through the **service/container name** `mysql-db`.
+
+---
+
+# Commands
+
+Build images
+
+```bash
+docker compose build
+```
+
+Start everything
+
+```bash
+docker compose up
+```
+
+Start in background
+
+```bash
+docker compose up -d
+```
+
+Rebuild after code changes
+
+```bash
+docker compose up --build
+```
+
+View logs
+
+```bash
+docker compose logs
+```
+
+View Spring Boot logs
+
+```bash
+docker compose logs springboot
+```
+
+View MySQL logs
+
+```bash
+docker compose logs mysql
+```
+
+Show running services
+
+```bash
+docker compose ps
+```
+
+Stop services
+
+```bash
+docker compose stop
+```
+
+Restart services
+
+```bash
+docker compose restart
+```
+
+Stop and remove containers
+
+```bash
+docker compose down
+```
+
+Stop and remove containers + volumes
+
+```bash
+docker compose down -v
+```
+
+Enter Spring Boot container
+
+```bash
+docker compose exec springboot sh
+```
+
+Enter MySQL container
+
+```bash
+docker compose exec mysql sh
+```
+
+---
+
+## Flow
+
+```text
+docker compose up
+        │
+        ▼
+Build Spring Boot Image
+        │
+Pull MySQL Image
+        │
+Create Bridge Network
+        │
+Create mysql-data Volume
+        │
+Start mysql-db
+        │
+Start spring-app
+        │
+Spring Boot connects to:
+jdbc:mysql://mysql-db:3306/DockerVirtualDB
+```
+
+This is very close to how a typical Spring Boot + MySQL setup is run locally using Docker Compose.

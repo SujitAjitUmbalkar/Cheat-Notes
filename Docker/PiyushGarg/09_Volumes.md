@@ -571,3 +571,199 @@ Container Instantly Sees Changes ✅
 > **Named Volume = Docker manages storage**
 >
 > **Bind Mount = You manage storage**
+
+
+# Docker Volumes – Commands Cheat Table
+
+| Step | Command                           | Used For                                               |
+| ---- | --------------------------------- | ------------------------------------------------------ |
+| 1    | `docker volume ls`                | List all Docker volumes.                               |
+| 2    | `docker volume create my-volume`  | Create a named (custom) volume.                        |
+| 3    | `docker volume inspect my-volume` | View volume details such as mount location and driver. |
+| 4    | `docker volume rm my-volume`      | Delete a specific volume.                              |
+| 5    | `docker volume prune`             | Delete all unused volumes.                             |
+
+---
+
+# Named Volume Commands
+
+### Create a Named Volume
+
+```bash
+docker volume create mysql-data
+```
+
+Creates a Docker-managed volume named `mysql-data`.
+
+---
+
+### Run a Container Using the Named Volume
+
+```bash
+docker run -d \
+--name mysql \
+-v mysql-data:/var/lib/mysql \
+mysql
+```
+
+Mounts the `mysql-data` volume into the MySQL container.
+
+---
+
+### Check Volumes
+
+```bash
+docker volume ls
+```
+
+Shows all created volumes.
+
+---
+
+### Inspect Volume
+
+```bash
+docker volume inspect mysql-data
+```
+
+Displays:
+
+* Mount point
+* Driver
+* Labels
+* Metadata
+
+---
+
+### Delete Volume
+
+```bash
+docker volume rm mysql-data
+```
+
+Deletes the volume.
+
+---
+
+# Bind Mount (Host Volume) Commands
+
+### Run a Container with a Host Folder (Windows)
+
+```bash
+docker run -d \
+-v C:\Docker\Data:/app/data \
+my-app
+```
+
+Maps the host folder `C:\Docker\Data` to `/app/data` inside the container.
+
+---
+
+### Run a Container with a Host Folder (Linux)
+
+```bash
+docker run -d \
+-v /home/user/data:/app/data \
+my-app
+```
+
+Maps the Linux folder to the container.
+
+---
+
+### Verify Inside the Container
+
+```bash
+docker exec -it my-app sh
+```
+
+Enter the running container.
+
+---
+
+```bash
+ls /app/data
+```
+
+View the mounted files.
+
+---
+
+# Command Flow (Named Volume)
+
+```text
+docker volume create mysql-data
+            │
+docker volume ls
+            │
+docker run -v mysql-data:/var/lib/mysql mysql
+            │
+docker volume inspect mysql-data
+            │
+docker volume rm mysql-data
+```
+
+---
+
+# Command Flow (Bind Mount)
+
+```text
+Host Folder Created
+        │
+docker run -v C:\Data:/app/data my-app
+        │
+docker exec -it my-app sh
+        │
+ls /app/data
+```
+
+---
+
+# Syntax Summary
+
+| Syntax                           | Meaning                  |
+| -------------------------------- | ------------------------ |
+| `-v volume-name:/container/path` | Named Volume             |
+| `-v host-path:/container/path`   | Bind Mount (Host Volume) |
+
+### Examples
+
+**Named Volume**
+
+```bash
+docker run -v mysql-data:/var/lib/mysql mysql
+```
+
+**Bind Mount**
+
+```bash
+docker run -v C:\Projects:/app my-app
+```
+
+---
+
+## Memory Trick
+
+**Named Volume**
+
+```text
+Create Volume
+      ↓
+Attach to Container
+      ↓
+Delete Container
+      ↓
+Volume Still Exists
+```
+
+**Bind Mount**
+
+```text
+Host Folder
+      ↓
+Mount to Container
+      ↓
+Edit on Host
+      ↓
+Container Sees Changes Immediately
+```

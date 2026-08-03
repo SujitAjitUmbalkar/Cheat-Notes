@@ -1,0 +1,426 @@
+# Kafka Notes – Part 5 : Partition Assignment & Event Processing
+
+---
+
+# 1. Problem
+
+A Topic can have multiple Partitions.
+
+Example:
+
+```text
+orders
+
+├── Partition 0
+├── Partition 1
+└── Partition 2
+```
+
+When a Producer publishes an event, Kafka must decide **which Partition should store it**.
+
+This process is called **Partition Assignment**.
+
+---
+
+# 2. Producer's Responsibility
+
+The Producer publishes an event to a **Topic**.
+
+Example:
+
+```text
+Producer
+    │
+    ▼
+Topic : orders
+```
+
+The Producer does **not** directly choose the Partition (in most cases).
+
+Kafka assigns the event to a Partition.
+
+---
+
+# 3. Partition Assignment Methods
+
+## Method 1 - Round Robin
+
+Events are distributed one by one across Partitions.
+
+Example:
+
+```text
+Event1 → Partition 0
+
+Event2 → Partition 1
+
+Event3 → Partition 2
+
+Event4 → Partition 0
+```
+
+**Purpose:**
+
+* Better load distribution.
+
+---
+
+## Method 2 - Using a Key (Most Common)
+
+Producer sends a **Key** with the event.
+
+Example:
+
+```text
+Key = CustomerId
+```
+
+or
+
+```text
+Key = OrderId
+```
+
+Kafka calculates the Partition using the Key.
+
+Events with the **same Key** always go to the **same Partition**.
+
+Example:
+
+```text
+Customer Rahul
+
+↓
+
+Partition 2
+
+↓
+
+OrderPlaced
+
+PaymentCompleted
+
+OrderShipped
+```
+
+**Benefit:**
+
+* Preserves event order for the same Key.
+
+---
+
+## Method 3 - Explicit Partition
+
+Producer explicitly specifies the Partition.
+
+Example:
+
+```text
+Partition = 1
+```
+
+Kafka stores the event in that Partition.
+
+---
+
+# 4. One Partition Does NOT Belong to One User
+
+❌ Wrong
+
+```text
+Partition 0 → Rahul
+
+Partition 1 → Amit
+
+Partition 2 → Neha
+```
+
+✅ Correct
+
+```text
+Partition 0
+
+Rahul - OrderPlaced
+
+Neha - OrderPlaced
+
+Rahul - PaymentCompleted
+
+Amit - OrderPlaced
+
+Neha - PaymentCompleted
+```
+
+A Partition stores events of **many users**.
+
+---
+
+# 5. Why Use a Key?
+
+Using the same Key ensures all related events remain in the same Partition.
+
+Example:
+
+```text
+Key = Customer Rahul
+
+↓
+
+Partition 2
+
+↓
+
+OrderPlaced
+
+PaymentCompleted
+
+OrderShipped
+```
+
+This preserves the order of Rahul's events.
+
+---
+
+# 6. Ordering Guarantee
+
+Kafka guarantees ordering **only within a single Partition**.
+
+Example:
+
+```text
+Partition 2
+
+OrderPlaced
+
+↓
+
+PaymentCompleted
+
+↓
+
+OrderShipped
+```
+
+Consumer always reads them in the same order.
+
+Kafka does **not** guarantee ordering across different Partitions.
+
+---
+
+# 7. How Consumer Processes Events
+
+Consumer does **not** search for a specific user.
+
+It processes events one by one as they arrive.
+
+Example:
+
+```text
+Partition 0
+
+Rahul - OrderPlaced
+
+↓
+
+Neha - OrderPlaced
+
+↓
+
+Rahul - PaymentCompleted
+
+↓
+
+Amit - OrderPlaced
+```
+
+Consumer processes:
+
+```text
+Event 1
+
+↓
+
+Event 2
+
+↓
+
+Event 3
+
+↓
+
+Event 4
+```
+
+---
+
+# 8. Consumer Uses Event Data
+
+Each event contains its own information.
+
+Example:
+
+```json
+{
+   "orderId":101,
+   "customerId":"Rahul",
+   "eventType":"OrderPlaced",
+   "productId":55,
+   "quantity":2
+}
+```
+
+Consumer reads the required fields.
+
+Example:
+
+* Inventory Service → `productId`, `quantity`
+* Email Service → `customerId`
+* Order Service → `orderId`
+
+---
+
+# Doubts Solved
+
+### Q1. Is one Partition created for one User?
+
+❌ No.
+
+A Partition stores events from many users.
+
+---
+
+### Q2. Won't events of different users get mixed?
+
+✅ Yes.
+
+Events are stored together inside the same Partition.
+
+Each event carries its own information (`orderId`, `customerId`, `eventType`, etc.), so they are never confused.
+
+---
+
+### Q3. How does Consumer identify the correct event?
+
+Consumer does **not** search for a specific event.
+
+Kafka delivers events sequentially.
+
+The consumer reads the event data and executes its business logic.
+
+---
+
+### Q4. Does Consumer search for Rahul's event?
+
+❌ No.
+
+Consumer simply receives the **next event** from Kafka.
+
+Example:
+
+```text
+Next Event
+
+↓
+
+Process
+
+↓
+
+Next Event
+
+↓
+
+Process
+```
+
+---
+
+### Q5. If events of many users are mixed, how does Inventory Service work?
+
+Inventory Service processes **every event** it receives.
+
+Example:
+
+```text
+Rahul - OrderPlaced
+
+↓
+
+Reduce Stock
+
+Neha - OrderPlaced
+
+↓
+
+Reduce Stock
+
+Rahul - PaymentCompleted
+
+↓
+
+Ignore (or perform another action based on business logic)
+```
+
+Each event is handled independently.
+
+---
+
+### Q6. Can Consumer fetch Rahul's event using `orderId` or `customerId`?
+
+❌ Not from Kafka.
+
+Kafka is **not a query database**.
+
+Consumers normally process events sequentially.
+
+Searching by `orderId` or `customerId` is typically done using a **database**, not Kafka.
+
+---
+
+### Q7. Difference Between Kafka and Database
+
+| Kafka                                   | Database                            |
+| --------------------------------------- | ----------------------------------- |
+| Streams events                          | Stores records                      |
+| Consumer processes events sequentially  | Applications query specific records |
+| Used for communication between services | Used to retrieve/update stored data |
+
+---
+
+# Complete Flow
+
+```text
+Producer
+    │
+Publishes Event
+    │
+    ▼
+Topic
+    │
+Kafka assigns Partition
+    │
+    ▼
+Partition
+    │
+Stores Events
+    │
+    ▼
+Consumer
+    │
+Reads Next Event
+    │
+Processes Business Logic
+```
+
+---
+
+# Remember
+
+* Producer publishes to a **Topic**.
+* Kafka assigns the event to a **Partition**.
+* A Partition stores events from **many users**.
+* Events with the **same Key** always go to the **same Partition**.
+* Ordering is guaranteed **within the same Partition**.
+* Consumers **do not search** for specific users or events.
+* Consumers process events **one by one**, using the data inside each event.
+* Kafka is a **messaging/event streaming platform**, not a **database**.

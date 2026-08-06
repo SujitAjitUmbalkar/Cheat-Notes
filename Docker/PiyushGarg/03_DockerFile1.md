@@ -330,3 +330,38 @@ Container
 ```
 
 **Image decides the environment. Container is only the running instance of that image.**
+
+
+### Go to project
+cd project-folder
+
+### Build image
+docker build -t my-app .
+
+### Verify image
+docker images
+
+### Run container
+docker run -d --name my-container -p 8080:8080 my-app
+
+### Check running containers
+docker ps
+
+### View logs
+docker logs -f my-container
+
+### Stop container
+docker stop my-container
+
+### Start again
+docker start my-container
+
+### Restart
+docker restart my-container
+
+### Remove container
+docker stop my-container
+docker rm my-container
+
+### Remove image
+docker rmi my-app

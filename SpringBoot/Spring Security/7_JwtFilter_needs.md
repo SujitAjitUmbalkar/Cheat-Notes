@@ -141,4 +141,12 @@ Access protected API
 
 ### One-line exam/interview answer
 
-> **JwtAuthFilter is used to authenticate incoming requests using the JWT token and store the authenticated user's information in Spring Security's SecurityContext.**
+The important point is:
+
+* UsernamePasswordAuthenticationFilter authenticates the user during login, while JwtAuthFilter re-authenticates the user on every subsequent request using the JWT.
+
+* So JwtAuthFilter doesn't normally help UsernamePasswordAuthenticationFilter. Instead, both are authentication mechanisms used at different stages of the security flow.
+
+* If you're writing notes, remember this one line:
+
+* Login → UsernamePasswordAuthenticationFilter; Subsequent requests → JwtAuthFilter.

@@ -146,7 +146,8 @@ The important point is:
 * UsernamePasswordAuthenticationFilter authenticates the user during login, while JwtAuthFilter re-authenticates the user on every subsequent request using the JWT.
 
 * So JwtAuthFilter doesn't normally help UsernamePasswordAuthenticationFilter. Instead, both are authentication mechanisms used at different stages of the security flow.
-
-* If you're writing notes, remember this one line:
-
+  
 * Login → UsernamePasswordAuthenticationFilter; Subsequent requests → JwtAuthFilter.
+
+* Both `UsernamePasswordAuthenticationFilter` and `JwtAuthFilter` can create an `Authentication` object and store it in Spring Security's `SecurityContext`. They use different authentication mechanisms: `UsernamePasswordAuthenticationFilter` authenticates the user using username and password, while `JwtAuthFilter` authenticates the user using a JWT token. Depending on the application's authentication mechanism, either filter can establish the authenticated user's identity.
+

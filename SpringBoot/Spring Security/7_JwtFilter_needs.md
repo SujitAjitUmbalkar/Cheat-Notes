@@ -10,6 +10,9 @@ For every subsequent protected API request, the client sends that JWT:
 Authorization: Bearer <JWT>
 ```
 
+
+---
+
 Spring Security needs to know:
 
 > **Who is making this request?**

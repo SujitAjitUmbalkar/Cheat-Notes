@@ -46,3 +46,8 @@ Open `http://localhost:6333/dashboard` in your browser and click on **Collection
 
 
 * The vector_store collection will not appear in the Qdrant Dashboard until your application actually inserts its first document vector. Qdrant lazily initializes the collection when the embedding model generates the first payload.
+
+* create vector-store externally
+```
+ curl -X PUT "http://localhost:6333/collections/vector_store" -H "Content-Type: application.json" -d "{\"vectors\": {\"size\": 768, \"distance\": \"Cosine\"}}"
+```

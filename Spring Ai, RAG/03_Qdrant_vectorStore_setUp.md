@@ -36,7 +36,10 @@ spring.ai.vectorstore.qdrant.initialize-schema=true
 
 ```
 
-*Verification:* Start your application; Spring AI will auto-connect to Qdrant on port 6334 and create the collection automatically.
+*Verification:
+* Before Starting your application;
+* Start Qdrant container 
+* Spring AI will auto-connect to Qdrant on port 6334 and create the collection automatically.
 
 
 ### Viewing Data in Qdrant

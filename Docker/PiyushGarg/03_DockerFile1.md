@@ -11,9 +11,27 @@
 * **Documents how your application should be built and run.**
 * **Allows customization** of the base image, ports, environment variables, commands, etc.
 
+```
+FROM eclipse-temurin:21-jre  , # This provides the Java 21 Runtime Environment required to run the application. (decides type of image (which os based ) )
+
+WORKDIR /app
+
+COPY target/DockerApp-0.0.1-SNAPSHOT.jar app.jar
+
+# Create user
+RUN useradd -m dockeruser
+
+# Switch user
+USER dockeruser
+
+EXPOSE 8080
+
+ENTRYPOINT ["java","-jar","app.jar"]
+
+
 **In one line:**
 👉 **Dockerfile = instructions for Docker to build an image for your application.**
-
+```
 
 ## Dockerfile Location
 

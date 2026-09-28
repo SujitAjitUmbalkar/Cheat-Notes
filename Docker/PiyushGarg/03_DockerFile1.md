@@ -12,25 +12,26 @@
 * **Allows customization** of the base image, ports, environment variables, commands, etc.
 
 ```
-FROM eclipse-temurin:21-jre  , # This provides the Java 21 Runtime Environment required to run the application. (decides type of image (which os based ) )
+# Base Image
+# Download a lightweight Linux image that already has Java 21 installed.
+FROM eclipse-temurin:21-jdk
 
+# Create and switch to /app directory inside the container.
+# All following commands execute from here.
 WORKDIR /app
 
+# Copy the JAR from your local project into the container.
+# Source (local): target/DockerApp-0.0.1-SNAPSHOT.jar
+# Destination (inside container): /app/app.jar
 COPY target/DockerApp-0.0.1-SNAPSHOT.jar app.jar
 
-# Create user
-RUN useradd -m dockeruser
 
-# Switch user
-USER dockeruser
-
+#"This image expects the application to listen on port 8080."
+# real port where application should run is written in app.yml.
 EXPOSE 8080
 
-ENTRYPOINT ["java","-jar","app.jar"]
-
-
-**In one line:**
-👉 **Dockerfile = instructions for Docker to build an image for your application.**
+# Command executed when the container starts.
+ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
 ## Dockerfile Location

@@ -68,3 +68,36 @@
 | `docker rm <container>`                              | Remove a stopped container                                     |
 
 ```
+
+```
+
+### 5. Docker Push 
+
+| Command                                                          | Purpose                                          |
+| ---------------------------------------------------------------- | ------------------------------------------------ |
+| `docker login`                                                   | Login to Docker Hub                              |
+| `docker build -t <username>/<repository>:latest .`               | Build/tag image using Docker Hub repository name |
+| `docker images`                                                  | Verify the image exists locally                  |
+| `docker push <username>/<repository>:latest`                     | Push image to Docker Hub                         |
+| `docker tag <image>:<old-tag> <username>/<repository>:<new-tag>` | Create another tag/version for an image          |
+| `docker push <username>/<repository>:<tag>`                      | Push a specific version/tag                      |
+| `docker pull <username>/<repository>:<tag>`                      | Download an image from Docker Hub                |
+| `docker run -p 8080:8080 <username>/<repository>:<tag>`          | Run the pulled image                             |
+
+### Important flow
+
+```bash
+docker login
+
+docker build -t <username>/<repository>:latest .
+
+docker images
+
+docker push <username>/<repository>:latest
+
+docker pull <username>/<repository>:latest
+
+docker run -p 8080:8080 <username>/<repository>:latest
+```
+
+`login → build → tag → push → pull → run`

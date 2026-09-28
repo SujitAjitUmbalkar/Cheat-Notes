@@ -44,6 +44,8 @@
 | `ENTRYPOINT ["command"]`         | Define the main executable                 |
 | `docker build -t <name> .`       | Build an image from the Dockerfile         |
 | `docker build -t <name>:<tag> .` | Build an image with a specific tag         |
+| `docker run -p 9090:8080 my-app` | Map **host 9090 → container 8080**         |
+
 
 ### 4. Port Mapping
 

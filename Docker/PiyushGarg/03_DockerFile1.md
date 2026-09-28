@@ -1,5 +1,20 @@
 # 🐳 Docker Concept Cheat Notes (From Dockerfile Discussion)
 
+### USES :
+
+* **To create your own Docker image** with your application + dependencies.
+* **Defines the environment** required to run the application.
+* **Automates image creation** instead of manually installing everything.
+* **Makes builds reproducible** — same Dockerfile → same setup.
+* **Packages application code + runtime + libraries** together.
+* **Useful for deployment** on servers, cloud, Kubernetes, etc.
+* **Documents how your application should be built and run.**
+* **Allows customization** of the base image, ports, environment variables, commands, etc.
+
+**In one line:**
+👉 **Dockerfile = instructions for Docker to build an image for your application.**
+
+
 ## Dockerfile Location
 
 * Create **Dockerfile in the root of Spring Boot project**.

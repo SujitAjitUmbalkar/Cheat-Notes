@@ -393,6 +393,7 @@ Image/config change → new ReplicaSet + rollout
 ```cmd
 kubectl apply -f file.yml
 
+kub..
 kubectl get pods
 kubectl get replicasets
 kubectl get deployments

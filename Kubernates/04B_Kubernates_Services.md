@@ -447,12 +447,11 @@ Pod inside cluster
    ClusterIP ✅
 ```
 ---
-
 # 3.2 NodePort
 
 ### What is it?
 
-`NodePort` exposes a Service through a port on each Kubernetes Node.
+`NodePort` exposes a Service through a port on **each Kubernetes Node**.
 
 ```text
 External Client
@@ -481,7 +480,9 @@ Commonly used for:
 
 It is generally not the preferred public entry point for a production application when a proper external load-balancing solution is available.
 
-### Configuration
+---
+
+## Configuration
 
 ```yaml
 apiVersion: v1
@@ -502,7 +503,7 @@ spec:
       nodePort: 30001      # External Node port
 ```
 
-Traffic:
+### Traffic Flow
 
 ```text
 Client
@@ -514,34 +515,304 @@ Service:80
 Pod:8080
 ```
 
-### Validate
+---
 
-```cmd
+# Validate NodePort Service
+
+### Step 1: Apply the Service
+
+```bash
 kubectl apply -f order-service.yaml
+```
 
+Expected:
+
+```text
+service/order-service created
+```
+
+---
+
+### Step 2: Check the Service
+
+```bash
 kubectl get svc
+```
 
-kubectl describe svc order-service
+Example:
 
-kubectl get nodes -o wide
+```text
+NAME            TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)
+order-service   NodePort   10.96.45.120   <none>        80:30001/TCP
 ```
 
 Look at:
 
 ```text
 PORT(S)
+
 80:30001/TCP
 ```
 
-Then access the NodePort using the appropriate Node address for your Kubernetes environment.
+This means:
 
-**Docker Desktop note:** don't use:
+```text
+Service Port = 80
+NodePort     = 30001
+```
 
-```cmd
+---
+
+### Step 3: Describe the Service
+
+```bash
+kubectl describe svc order-service
+```
+
+Check:
+
+* `Type`
+* `Selector`
+* `Port`
+* `TargetPort`
+* `NodePort`
+* `Endpoints`
+
+---
+
+### Step 4: Check the Nodes
+
+```bash
+kubectl get nodes -o wide
+```
+
+Example:
+
+```text
+NAME                   STATUS   ROLES           INTERNAL-IP
+desktop-control-plane  Ready    control-plane   192.168.x.x
+```
+
+You need the appropriate Node address for your Kubernetes environment.
+
+---
+
+### Step 5: Check the Target Pods
+
+```bash
+kubectl get pods -o wide
+```
+
+Make sure the `order` Pods are:
+
+```text
+STATUS = Running
+```
+
+Also verify that the Service has endpoints:
+
+```bash
+kubectl get endpoints order-service
+```
+
+Example:
+
+```text
+NAME            ENDPOINTS
+order-service   10.244.0.5:8080,10.244.0.6:8080
+```
+
+This confirms that the Service has Pods to forward traffic to.
+
+---
+
+# Test NodePort Communication
+
+The important difference from ClusterIP is:
+
+```text
+ClusterIP:
+Pod inside cluster
+      ↓
+ClusterIP Service
+
+NodePort:
+External Client
+      ↓
+NodeIP:NodePort
+      ↓
+Service
+      ↓
+Pod
+```
+
+### Step 6: Access the Service
+
+If your application is HTTP-based, such as a Spring Boot application, you can test the NodePort using a web browser such as **Chrome**.
+
+Use:
+
+```text
+http://<NodeIP>:30001
+```
+
+For example:
+
+```text
+http://192.168.x.x:30001
+```
+
+If your application has an endpoint:
+
+```text
+http://192.168.x.x:30001/orders
+```
+
+Enter the URL directly into Chrome.
+
+If the application returns a response, NodePort is working.
+
+Traffic flow:
+
+```text
+Chrome
+  ↓
+NodeIP:30001
+  ↓
+NodePort Service
+  ↓
+Order Pod:8080
+```
+
+> **Docker Desktop note:** Do not blindly assume that the `INTERNAL-IP` shown by `kubectl get nodes -o wide` is the address that Chrome should use. Docker Desktop's networking can differ from Minikube or cloud Kubernetes. Use the appropriate Node address for your Docker Desktop environment.
+
+---
+
+## Docker Desktop Note
+
+You are using **Docker Desktop Kubernetes**, so do **not** use:
+
+```bash
 minikube service order-service
 ```
 
-because that command is Minikube-specific.
+That command is Minikube-specific.
+
+Instead, use the Node address and NodePort appropriate to your Docker Desktop Kubernetes environment.
+
+---
+
+# Test From Inside the Cluster
+
+You can also verify that the NodePort Service is reachable from another Pod.
+
+### Step 1: Create a temporary Test Pod
+
+```bash
+kubectl run test-pod --image=curlimages/curl -it --rm -- sh
+```
+
+You are now inside the Pod.
+
+---
+
+### Step 2: Test the Service
+
+```bash
+curl http://order-service
+```
+
+This tests the Service through its normal **ClusterIP**.
+
+---
+
+### Step 3: Test the NodePort specifically
+
+```bash
+curl http://<NodeIP>:30001
+```
+
+However, for learning NodePort, the more important test is accessing:
+
+```text
+NodeIP:30001
+```
+
+from **outside the cluster**, such as Chrome.
+
+---
+
+### Step 4: Exit the Test Pod
+
+```bash
+exit
+```
+
+Because the Pod was created with `--rm`, Kubernetes automatically removes the temporary Pod after you exit.
+
+---
+
+## Complete Testing Flow
+
+```text
+1. Apply Service
+       ↓
+kubectl apply -f order-service.yaml
+
+2. Check Service
+       ↓
+kubectl get svc
+
+3. Check Service details
+       ↓
+kubectl describe svc order-service
+
+4. Check Nodes
+       ↓
+kubectl get nodes -o wide
+
+5. Check Pods
+       ↓
+kubectl get pods -o wide
+
+6. Check Endpoints
+       ↓
+kubectl get endpoints order-service
+
+7. Access NodePort
+       ↓
+Chrome → http://<NodeIP>:30001
+
+8. Request reaches Service
+       ↓
+Order Pod
+```
+
+### Important
+
+NodePort exposes the Service through a **port on the Kubernetes Node**.
+
+```text
+External Client
+       ↓
+NodeIP:30001
+       ↓
+NodePort Service
+       ↓
+Order Pod
+```
+
+Remember:
+
+```text
+ClusterIP
+    ↓
+Internal cluster access
+
+NodePort
+    ↓
+External access through NodeIP:NodePort
+```
 
 ---
 
@@ -563,7 +834,9 @@ Pods
 
 The external Load Balancer is **infrastructure**, not your API Gateway.
 
-Your API Gateway is an application.
+Your API Gateway is an **application**.
+
+---
 
 ### Use cases
 
@@ -571,7 +844,7 @@ Use it when:
 
 * An application needs external/public access.
 * You want an external load-balancing entry point.
-* Your cloud/Kubernetes environment supports LoadBalancer Services.
+* Your cloud/Kubernetes environment supports `LoadBalancer` Services.
 
 Typical architecture:
 
@@ -589,7 +862,9 @@ Order Pods
 
 Usually, you expose the **API Gateway**, not every microservice.
 
-### Configuration
+---
+
+## Configuration
 
 ```yaml
 apiVersion: v1
@@ -609,25 +884,356 @@ spec:
       targetPort: 8080     # Gateway container port
 ```
 
-### Validate
+### Traffic Flow
 
-```cmd
+```text
+Client
+   ↓
+External Load Balancer
+   ↓
+LoadBalancer Service :80
+   ↓
+API Gateway Pod :8080
+   ↓
+Order Service (ClusterIP)
+   ↓
+Order Pods
+```
+
+---
+
+# Validate LoadBalancer Service
+
+### Step 1: Apply the Service
+
+```bash
 kubectl apply -f api-gateway-service.yaml
+```
 
+Expected:
+
+```text
+service/api-gateway created
+```
+
+---
+
+### Step 2: Check the Service
+
+```bash
 kubectl get svc
+```
 
+Example in a cloud environment:
+
+```text
+NAME          TYPE           CLUSTER-IP     EXTERNAL-IP       PORT(S)
+api-gateway   LoadBalancer   10.96.45.120   34.120.50.100     80:31234/TCP
+```
+
+Check:
+
+* `TYPE` = `LoadBalancer`
+* `EXTERNAL-IP` has an address if the infrastructure has provisioned one
+* `PORT(S)` is correct
+
+---
+
+### Step 3: Describe the Service
+
+```bash
 kubectl describe svc api-gateway
 ```
 
 Check:
 
+* `Type`
+* `Selector`
+* `Port`
+* `TargetPort`
+* `Endpoints`
+* Events related to LoadBalancer provisioning
+
+---
+
+### Step 4: Check the API Gateway Pods
+
+```bash
+kubectl get pods -o wide
+```
+
+Make sure the Gateway Pods are:
+
+```text
+STATUS = Running
+```
+
+Also check the Service endpoints:
+
+```bash
+kubectl get endpoints api-gateway
+```
+
+Example:
+
+```text
+NAME          ENDPOINTS
+api-gateway   10.244.0.5:8080,10.244.0.6:8080
+```
+
+This confirms that the LoadBalancer Service has Gateway Pods to forward traffic to.
+
+---
+
+# Test LoadBalancer Communication
+
+The important difference from NodePort is:
+
+```text
+NodePort:
+External Client
+      ↓
+NodeIP:NodePort
+      ↓
+Service
+      ↓
+Pods
+
+LoadBalancer:
+External Client
+      ↓
+External Load Balancer
+      ↓
+Service
+      ↓
+Pods
+```
+
+### Step 5: Get the External Address
+
+```bash
+kubectl get svc api-gateway
+```
+
+Look at:
+
 ```text
 EXTERNAL-IP
 ```
 
-If your environment/cloud provisions one, the external address will appear there.
+For example:
 
-**Docker Desktop:** `LoadBalancer` behavior may differ from a cloud Kubernetes environment, so don't assume it will provide a real public cloud load balancer locally.
+```text
+34.120.50.100
+```
+
+---
+
+### Step 6: Access the Service
+
+If the API Gateway is an HTTP application, you can test it using **Chrome**.
+
+Use:
+
+```text
+http://<EXTERNAL-IP>
+```
+
+For example:
+
+```text
+http://34.120.50.100
+```
+
+If your Gateway has an endpoint:
+
+```text
+http://34.120.50.100/orders
+```
+
+If the application returns a response, the LoadBalancer Service is working.
+
+Traffic flow:
+
+```text
+Chrome
+   ↓
+External Load Balancer
+   ↓
+api-gateway Service
+   ↓
+API Gateway Pod
+```
+
+---
+
+## Test Using curl
+
+You can also test from a terminal:
+
+```bash
+curl http://<EXTERNAL-IP>
+```
+
+Or:
+
+```bash
+curl http://<EXTERNAL-IP>/orders
+```
+
+For learning, Chrome is enough when the application is HTTP-based.
+
+---
+
+# Docker Desktop Important Note
+
+You are using **Docker Desktop Kubernetes**.
+
+A `LoadBalancer` Service on a local Kubernetes environment does **not necessarily create a real public cloud Load Balancer**.
+
+Therefore, after:
+
+```bash
+kubectl apply -f api-gateway-service.yaml
+```
+
+you may see:
+
+```text
+NAME          TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)
+api-gateway   LoadBalancer   10.96.45.120   <pending>      80:31234/TCP
+```
+
+`<pending>` means that your local environment has not provisioned an external LoadBalancer address.
+
+Do **not** assume that Docker Desktop behaves like AWS, Azure, or GCP.
+
+In a cloud Kubernetes environment:
+
+```text
+LoadBalancer Service
+        ↓
+Cloud Provider
+        ↓
+External Load Balancer
+        ↓
+Public IP / DNS
+```
+
+Locally:
+
+```text
+LoadBalancer Service
+        ↓
+Depends on local Kubernetes implementation
+        ↓
+May not receive a public EXTERNAL-IP
+```
+
+---
+
+# What Happens in a Cloud Environment?
+
+For example:
+
+```text
+Internet
+    ↓
+Cloud Load Balancer
+    ↓
+LoadBalancer Service
+    ↓
+API Gateway Pods
+```
+
+The cloud provider provisions the external load-balancing infrastructure when Kubernetes requests a `LoadBalancer` Service.
+
+The exact implementation depends on the cloud provider and Kubernetes environment.
+
+---
+
+## Complete Testing Flow
+
+```text
+1. Apply Service
+       ↓
+kubectl apply -f api-gateway-service.yaml
+
+2. Check Service
+       ↓
+kubectl get svc
+
+3. Check Service details
+       ↓
+kubectl describe svc api-gateway
+
+4. Check Gateway Pods
+       ↓
+kubectl get pods -o wide
+
+5. Check Endpoints
+       ↓
+kubectl get endpoints api-gateway
+
+6. Check EXTERNAL-IP
+       ↓
+kubectl get svc api-gateway
+
+7. If an external address is provisioned
+       ↓
+Chrome → http://<EXTERNAL-IP>
+
+8. Request reaches
+       ↓
+External Load Balancer
+       ↓
+api-gateway Service
+       ↓
+API Gateway Pod
+```
+
+### Important
+
+`LoadBalancer` provides an **external entry point** through infrastructure that supports external load balancing.
+
+```text
+Internet
+    ↓
+External Load Balancer
+    ↓
+LoadBalancer Service
+    ↓
+API Gateway Pods
+```
+
+Remember:
+
+```text
+ClusterIP
+    ↓
+Internal cluster access
+
+NodePort
+    ↓
+External access through NodeIP:NodePort
+
+LoadBalancer
+    ↓
+External access through an infrastructure-provided
+Load Balancer / external address
+```
+
+**Important architecture point:**
+
+```text
+Load Balancer ≠ API Gateway
+
+Load Balancer
+    → Infrastructure
+
+API Gateway
+    → Application
+```
 
 ---
 

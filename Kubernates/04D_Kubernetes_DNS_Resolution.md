@@ -415,7 +415,11 @@ Because:
 inventory-service
 ```
 
-is Kubernetes' internal DNS name.
+is a **Kubernetes internal DNS name**.
+
+It is meant to be resolved by Kubernetes DNS for workloads running **inside the cluster**.
+
+---
 
 ### ✅ Application inside Kubernetes
 
@@ -427,7 +431,76 @@ http://inventory-service
 
 because it uses Kubernetes DNS.
 
-### External user
+For example, if **Order Service** needs to call **Inventory Service**:
+
+```text
+Order Service Pod
+       ↓
+http://inventory-service
+       ↓
+Inventory Service (ClusterIP)
+       ↓
+Inventory Pods
+```
+
+The Java application can make this request using **Feign, RestTemplate, WebClient, etc.**
+
+#### Example using OpenFeign
+
+```java
+@FeignClient(name = "inventory-service")
+public interface InventoryClient {
+
+    @GetMapping("/products/{id}")
+    ProductResponse getProduct(@PathVariable Long id);
+}
+```
+
+Here, the request is made internally:
+
+```text
+Order Service
+      ↓
+inventory-service
+      ↓
+Kubernetes DNS
+      ↓
+Inventory Service ClusterIP
+      ↓
+Inventory Pod
+```
+
+You **do not need NodePort, LoadBalancer, or a public IP** for this communication.
+
+---
+
+### 🧪 How can we manually test this?
+
+We can use `curl` from **another Pod** inside the cluster:
+
+```bash
+kubectl run test-pod --rm -it --image=curlimages/curl -- sh
+```
+
+Then:
+
+```bash
+curl http://inventory-service/products/1
+```
+
+Here `curl` is only a **testing tool**.
+
+Your actual application does **not** need `curl`; it can use Feign, RestTemplate, WebClient, etc.
+
+The important part is that the request is made **from inside the Kubernetes cluster**, where Kubernetes DNS can resolve:
+
+```text
+inventory-service
+```
+
+---
+
+### 🌐 External User
 
 The normal flow is:
 
@@ -436,14 +509,29 @@ Browser
    ↓
 External API Gateway
    ↓
-Order Service
+Order Service (ClusterIP)
    ↓
-Inventory Service
+Inventory Service (ClusterIP)
 ```
 
 The browser talks to the **externally exposed entry point**.
 
-The microservices talk to each other using **ClusterIP + DNS**.
+The microservices talk to each other internally using:
+
+> **ClusterIP + Kubernetes DNS**
+
+Therefore:
+
+```text
+External communication
+→ External endpoint / API Gateway
+
+Internal communication
+→ ClusterIP + Kubernetes DNS
+→ http://inventory-service
+```
+
+There is **no relation to external LoadBalancer/NodePort** when Order Service communicates internally with Inventory Service.
 
 ---
 

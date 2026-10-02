@@ -107,8 +107,7 @@ Kubernetes provides three commonly used Service types:
 3. `LoadBalancer`
 
 ---
-
-## 3.1 ClusterIP
+# 3.1 ClusterIP
 
 ### What is it?
 
@@ -147,7 +146,9 @@ Inventory Service (ClusterIP)
 Inventory Pods
 ```
 
-### Configuration
+---
+
+## Configuration
 
 ```yaml
 apiVersion: v1
@@ -167,34 +168,284 @@ spec:
       targetPort: 8080   # Application/Pod port
 ```
 
-### Validate
+---
 
-```cmd
+## Validate Service
+
+### 1. Apply the Service
+
+```bash
 kubectl apply -f order-service.yaml
+```
 
+### 2. Check the Service
+
+```bash
 kubectl get svc
+```
 
+Check that:
+
+* `TYPE` is `ClusterIP`
+* Service has a `CLUSTER-IP`
+* Port is correctly configured
+
+### 3. Describe the Service
+
+```bash
 kubectl describe svc order-service
 ```
 
-Check the `Selector` and `Endpoints`.
+Check:
 
-```cmd
+* `Selector`
+* `Port`
+* `TargetPort`
+* `Endpoints`
+
+### 4. Check Endpoints
+
+```bash
 kubectl get endpoints order-service
 ```
 
-Test service DNS **from inside the cluster**:
+Example:
 
 ```text
-http://order-service
+NAME            ENDPOINTS
+order-service   10.244.0.5:8080,10.244.0.6:8080
 ```
 
-Full DNS:
+This confirms that the Service has found the Pods matching:
+
+```yaml
+selector:
+  app: order
+```
+
+---
+
+# Test Communication Between Pods Through ClusterIP
+
+The communication pattern we want to test is:
+
+```text
+Test Pod
+    ↓
+ClusterIP Service
+    ↓
+Order Pod
+```
+
+### Step 1: Check target Pods
+
+```bash
+kubectl get pods
+```
+
+Make sure the target Pods are `Running`.
+
+---
+
+### Step 2: Check the Service
+
+```bash
+kubectl get svc
+```
+
+Make sure `order-service` exists and is of type `ClusterIP`.
+
+---
+
+### Step 3: Check Service **Endpoints**
+
+```bash
+kubectl get endpoints order-service
+```
+
+You should see the IP addresses and ports of the target Pods.
+
+Example:
+
+```text
+order-service   10.244.0.5:8080,10.244.0.6:8080
+```
+
+If you see:
+
+```text
+<none>
+```
+
+the Service is not finding the Pods. Check the Service selector and Pod labels.
+
+---
+
+### Step 4: Create a temporary Test Pod
+
+```bash
+kubectl run test-pod --image=curlimages/curl -it --rm -- sh
+```
+
+This creates a temporary Pod and immediately opens its shell.
+
+You are now **inside the Pod**.
+
+You will see something similar to:
+
+```text
+/ $
+```
+
+> Because `-it --rm -- sh` is used, you do **not** need a separate `kubectl exec` command.
+
+---
+
+### Alternative: Enter an Existing Pod
+
+If the Pod is already running:
+
+```bash
+kubectl get pods
+```
+
+Then:
+
+```bash
+kubectl exec -it test-pod -- sh
+```
+
+Now you are inside the Pod.
+
+---
+
+### Step 5: Test the ClusterIP Service
+
+From inside the `test-pod`:
+
+```bash
+curl http://order-service
+```
+
+Or call a specific application endpoint:
+
+```bash
+curl http://order-service/orders
+```
+
+If the application returns a response, communication is successful.
+
+```text
+Test Pod
+    │
+    │ HTTP request
+    ↓
+order-service
+   (ClusterIP)
+    │
+    ↓
+Order Pod
+```
+
+---
+
+## Test Service DNS
+
+Kubernetes automatically provides DNS for Services.
+
+From inside the test Pod:
+
+```bash
+curl http://order-service
+```
+
+Kubernetes resolves:
+
+```text
+order-service
+      ↓
+ClusterIP
+      ↓
+Order Pods
+```
+
+You can also use the full DNS name:
 
 ```text
 order-service.<namespace>.svc.cluster.local
 ```
 
+For example, if the Service is in the `prod` namespace:
+
+```bash
+curl http://order-service.prod.svc.cluster.local
+```
+
+---
+
+## Exit the Test Pod
+
+```bash
+exit
+```
+
+If the Pod was created using:
+
+```bash
+kubectl run test-pod --image=curlimages/curl -it --rm -- sh
+```
+
+the `--rm` option automatically removes the temporary Pod after you exit.
+
+---
+
+## Complete Testing Flow
+
+```text
+1. Apply Service
+       ↓
+kubectl apply -f order-service.yaml
+
+2. Check Service
+       ↓
+kubectl get svc
+
+3. Check Pods
+       ↓
+kubectl get pods
+
+4. Check Endpoints
+       ↓
+kubectl get endpoints order-service
+
+5. Create / enter Test Pod
+       ↓
+kubectl run test-pod --image=curlimages/curl -it --rm -- sh
+
+6. Test Service
+       ↓
+curl http://order-service
+
+7. Service forwards request
+       ↓
+Order Pod
+```
+
+### Important
+
+ClusterIP is **internal to the cluster**.
+
+Therefore:
+
+```text
+Windows CMD / Browser
+        ↓
+   ClusterIP ❌
+
+Pod inside cluster
+        ↓
+   ClusterIP ✅
+```
 ---
 
 # 3.2 NodePort

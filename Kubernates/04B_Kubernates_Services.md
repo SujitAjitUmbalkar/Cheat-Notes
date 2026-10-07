@@ -225,21 +225,40 @@ selector:
 
 ---
 
+apiVersion: v1
+kind: Service
+
+metadata:
+name: order-service
+
+spec:
+type: ClusterIP       # Internal cluster access
+
+selector:
+app: order           # Selects Pods having app=order
+
+ports:
+- port: 80           # Service port
+targetPort: 8080   # Application/Pod port
+
+this is configuration , now
+
 # Test Communication Between Pods Through ClusterIP
 
 The communication pattern we want to test is:
 
-```text
+```
 Test Pod
     ↓
 ClusterIP Service
     ↓
 Order Pod
+
 ```
 
 ### Step 1: Check target Pods
 
-```bash
+```
 kubectl get pods
 ```
 
@@ -249,7 +268,7 @@ Make sure the target Pods are `Running`.
 
 ### Step 2: Check the Service
 
-```bash
+```
 kubectl get svc
 ```
 
@@ -259,7 +278,7 @@ Make sure `order-service` exists and is of type `ClusterIP`.
 
 ### Step 3: Check Service **Endpoints**
 
-```bash
+```
 kubectl get endpoints order-service
 ```
 
@@ -267,14 +286,16 @@ You should see the IP addresses and ports of the target Pods.
 
 Example:
 
-```text
+```
 order-service   10.244.0.5:8080,10.244.0.6:8080
+
 ```
 
 If you see:
 
-```text
+```
 <none>
+
 ```
 
 the Service is not finding the Pods. Check the Service selector and Pod labels.
@@ -283,7 +304,7 @@ the Service is not finding the Pods. Check the Service selector and Pod labels.
 
 ### Step 4: Create a temporary Test Pod
 
-```bash
+```
 kubectl run test-pod --image=curlimages/curl -it --rm -- sh
 ```
 
@@ -293,8 +314,9 @@ You are now **inside the Pod**.
 
 You will see something similar to:
 
-```text
+```
 / $
+
 ```
 
 > Because `-it --rm -- sh` is used, you do **not** need a separate `kubectl exec` command.
@@ -305,13 +327,13 @@ You will see something similar to:
 
 If the Pod is already running:
 
-```bash
+```
 kubectl get pods
 ```
 
 Then:
 
-```bash
+```
 kubectl exec -it test-pod -- sh
 ```
 
@@ -323,19 +345,61 @@ Now you are inside the Pod.
 
 From inside the `test-pod`:
 
-```bash
+```
 curl http://order-service
 ```
 
 Or call a specific application endpoint:
 
-```bash
+```
 curl http://order-service/orders
 ```
 
+### Why don't we use `:80` in the URL?
+
+Our Service uses:
+
+```yaml
+port: 80
+```
+
+Port `80` is the **default port for HTTP**, so:
+
+```
+curl http://order-service
+```
+
+automatically means:
+
+```
+curl http://order-service:80
+```
+
+Therefore, `:80` is optional.
+
+### What if the Service uses another port, such as `81`?
+
+If the Service configuration is:
+
+```yaml
+ports:
+  - port: 81
+    targetPort: 8080
+```
+
+then you **must specify the port** in the URL:
+
+```
+curl http://order-service:81
+```
+
+Because `81` is not the default HTTP port.
+
+> **Remember:** The URL uses the **Service `port`**, not the `targetPort`.
+
 If the application returns a response, communication is successful.
 
-```text
+```
 Test Pod
     │
     │ HTTP request
@@ -345,6 +409,7 @@ order-service
     │
     ↓
 Order Pod
+
 ```
 
 ---
@@ -355,29 +420,31 @@ Kubernetes automatically provides DNS for Services.
 
 From inside the test Pod:
 
-```bash
+```
 curl http://order-service
 ```
 
 Kubernetes resolves:
 
-```text
+```
 order-service
       ↓
 ClusterIP
       ↓
 Order Pods
+
 ```
 
 You can also use the full DNS name:
 
-```text
+```
 order-service.<namespace>.svc.cluster.local
+
 ```
 
 For example, if the Service is in the `prod` namespace:
 
-```bash
+```
 curl http://order-service.prod.svc.cluster.local
 ```
 
@@ -385,67 +452,18 @@ curl http://order-service.prod.svc.cluster.local
 
 ## Exit the Test Pod
 
-```bash
+```
 exit
 ```
 
 If the Pod was created using:
 
-```bash
+```
 kubectl run test-pod --image=curlimages/curl -it --rm -- sh
 ```
 
 the `--rm` option automatically removes the temporary Pod after you exit.
 
----
-
-## Complete Testing Flow
-
-```text
-1. Apply Service
-       ↓
-kubectl apply -f order-service.yaml
-
-2. Check Service
-       ↓
-kubectl get svc
-
-3. Check Pods
-       ↓
-kubectl get pods
-
-4. Check Endpoints
-       ↓
-kubectl get endpoints order-service
-
-5. Create / enter Test Pod
-       ↓
-kubectl run test-pod --image=curlimages/curl -it --rm -- sh
-
-6. Test Service
-       ↓
-curl http://order-service
-
-7. Service forwards request
-       ↓
-Order Pod
-```
-
-### Important
-
-ClusterIP is **internal to the cluster**.
-
-Therefore:
-
-```text
-Windows CMD / Browser
-        ↓
-   ClusterIP ❌
-
-Pod inside cluster
-        ↓
-   ClusterIP ✅
-```
 ---
 # 3.2 NodePort
 

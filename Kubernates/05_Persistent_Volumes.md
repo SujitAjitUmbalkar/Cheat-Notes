@@ -109,16 +109,18 @@ It describes storage that Kubernetes can provide to Pods.
 Example:
 
 ```yaml
-kind: PersistentVolume
+apiVersion: v1                  # Uses the core Kubernetes API
+kind: PersistentVolume          # Creates a PersistentVolume resource
+
 metadata:
-  name: mypv
+  name: mypv                    # Name of the PV
 
 spec:
   capacity:
-    storage: 1Gi
+    storage: 1Gi                # Advertises 1Gi of storage capacity
 
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOnce             # Allows read/write access from one node
 ```
 
 Think:
@@ -134,18 +136,18 @@ A **PVC is an application's request for storage**.
 Example:
 
 ```yaml
-kind: PersistentVolumeClaim
+kind: PersistentVolumeClaim      # Creates a PersistentVolumeClaim
 
 metadata:
-  name: mypvc
+  name: mypvc                     # Name of the PVC
 
 spec:
   resources:
     requests:
-      storage: 1Gi
+      storage: 1Gi                # Requests 1Gi of storage
 
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOnce               # Requests read/write access from one node
 ```
 
 Think:
@@ -232,7 +234,7 @@ Example:
 
 ```yaml
 hostPath:
-  path: /tmp/demo-pv
+  path: /tmp/demo-pv              # Directory on the Kubernetes node used for storage
 ```
 
 The actual data exists on the node:
@@ -318,89 +320,89 @@ Node 2 does not automatically have Node 1's data.
 ### PV
 
 ```yaml
-apiVersion: v1
-kind: PersistentVolume
+apiVersion: v1                     # Uses the core Kubernetes API
+kind: PersistentVolume             # Creates a PersistentVolume
 
 metadata:
-  name: mypv
+  name: mypv                       # Name of the PV
 
 spec:
   capacity:
-    storage: 1Gi
+    storage: 1Gi                   # Advertises 1Gi of storage
 
-  volumeMode: Filesystem
+  volumeMode: Filesystem           # Makes the volume available as a filesystem
 
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOnce                # Allows read/write access from one node
 
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Delete # Deletes the storage when the claim is deleted
 
   hostPath:
-    path: /tmp/demo-pv
+    path: /tmp/demo-pv              # Uses this directory on the node as the storage
 ```
 
 ### PVC
 
 ```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
+apiVersion: v1                     # Uses the core Kubernetes API
+kind: PersistentVolumeClaim        # Creates a PersistentVolumeClaim
 
 metadata:
-  name: mypvc
+  name: mypvc                      # Name of the PVC
 
 spec:
   resources:
     requests:
-      storage: 1Gi
+      storage: 1Gi                 # Requests 1Gi of storage
 
-  volumeMode: Filesystem
+  volumeMode: Filesystem            # Requests the volume as a filesystem
 
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOnce                 # Requests read/write access from one node
 
-  volumeName: mypv
+  volumeName: mypv                  # Explicitly binds this PVC to the PV named mypv
 ```
 
 ### Deployment
 
 ```yaml
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: apps/v1                # Uses the Deployment API
+kind: Deployment                   # Creates a Deployment
 
 metadata:
-  name: myapp-deployment
+  name: myapp-deployment            # Name of the Deployment
 
 spec:
-  replicas: 3
+  replicas: 3                       # Keeps 3 Pod replicas running
 
   selector:
     matchLabels:
-      app: myapp
+      app: myapp                    # Deployment manages Pods with app=myapp
 
   template:
     metadata:
       labels:
-        app: myapp
+        app: myapp                  # Label assigned to created Pods
 
     spec:
       containers:
-        - name: myapp
-          image: nginx:latest
+        - name: myapp               # Container name
+          image: nginx:latest       # Container image to run
 
           volumeMounts:
-            - name: data
-              mountPath: /data
+            - name: data            # References the volume defined below
+              mountPath: /data      # Mounts the volume inside the container at /data
 
       volumes:
-        - name: data
+        - name: data                # Name of the Pod volume
           persistentVolumeClaim:
-            claimName: mypvc
+            claimName: mypvc        # Uses the PVC named mypvc
 ```
 
 Notice:
 
 ```yaml
-claimName: mypvc
+claimName: mypvc                  # Pod references the PVC, not the PV
 ```
 
 The Pod references the **PVC**, not the PV.
@@ -412,20 +414,20 @@ The Pod references the **PVC**, not the PV.
 ### Step 1 — Create PV
 
 ```cmd
-kubectl apply -f My-Pv.yml
+kubectl apply -f My-Pv.yml          # Creates the PersistentVolume
 ```
 
 ### Step 2 — Create PVC
 
 ```cmd
-kubectl apply -f My-Pvc.yml
+kubectl apply -f My-Pvc.yml         # Creates the PersistentVolumeClaim
 ```
 
 ### Step 3 — Verify binding
 
 ```cmd
-kubectl get pv
-kubectl get pvc
+kubectl get pv                      # Shows PersistentVolumes
+kubectl get pvc                     # Shows PersistentVolumeClaims
 ```
 
 Expected:
@@ -446,13 +448,13 @@ mypv     1Gi   RWO   Bound   default/mypvc
 ### Step 4 — Create Deployment
 
 ```cmd
-kubectl apply -f Deployment.yml
+kubectl apply -f Deployment.yml     # Creates the Deployment
 ```
 
 Check:
 
 ```cmd
-kubectl get pods
+kubectl get pods                    # Lists the Pods created by the Deployment
 ```
 
 ---
@@ -460,13 +462,13 @@ kubectl get pods
 ### Step 5 — Enter Pod
 
 ```cmd
-kubectl exec -it <pod-name> -- bash
+kubectl exec -it <pod-name> -- bash # Opens an interactive bash shell inside the Pod
 ```
 
 Inside:
 
 ```bash
-ls /data
+ls /data                           # Lists files in the mounted persistent storage
 ```
 
 The `/data` directory should exist.
@@ -476,13 +478,13 @@ The `/data` directory should exist.
 ### Step 6 — Write data
 
 ```bash
-echo "hello kubernetes" > /data/test.txt
+echo "hello kubernetes" > /data/test.txt  # Writes data into the persistent volume
 ```
 
 Check:
 
 ```bash
-cat /data/test.txt
+cat /data/test.txt                 # Reads the data stored in the volume
 ```
 
 Output:
@@ -498,31 +500,31 @@ hello kubernetes
 Exit:
 
 ```bash
-exit
+exit                                # Leaves the Pod's shell
 ```
 
 Delete the Pod:
 
 ```cmd
-kubectl delete pod <pod-name>
+kubectl delete pod <pod-name>       # Deletes the current Pod
 ```
 
 Deployment creates a replacement Pod.
 
 ```cmd
-kubectl get pods
+kubectl get pods                    # Checks the replacement Pod
 ```
 
 Enter the new Pod:
 
 ```cmd
-kubectl exec -it <new-pod-name> -- bash
+kubectl exec -it <new-pod-name> -- bash # Opens a shell in the replacement Pod
 ```
 
 Check:
 
 ```bash
-cat /data/test.txt
+cat /data/test.txt                 # Reads the previously stored data
 ```
 
 If you still get:
@@ -625,65 +627,65 @@ NFS Path:   /shared/k8s
 ### PV
 
 ```yaml
-apiVersion: v1
-kind: PersistentVolume
+apiVersion: v1                     # Uses the core Kubernetes API
+kind: PersistentVolume             # Creates a PersistentVolume
 
 metadata:
-  name: nfs-pv
+  name: nfs-pv                     # Name of the NFS PV
 
 spec:
   capacity:
-    storage: 10Gi
+    storage: 10Gi                  # Advertises 10Gi of storage
 
-  volumeMode: Filesystem
+  volumeMode: Filesystem           # Makes the NFS volume available as a filesystem
 
   accessModes:
-    - ReadWriteMany
+    - ReadWriteMany                # Allows read/write access from multiple nodes
 
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Delete # Deletes the storage when the claim is deleted
 
   nfs:
-    server: 192.168.1.100
-    path: /shared/k8s
+    server: 192.168.1.100          # Address of the NFS server
+    path: /shared/k8s               # Shared directory exported by the NFS server
 ```
 
 ### PVC
 
 ```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
+apiVersion: v1                     # Uses the core Kubernetes API
+kind: PersistentVolumeClaim        # Creates a PersistentVolumeClaim
 
 metadata:
-  name: nfs-pvc
+  name: nfs-pvc                    # Name of the PVC
 
 spec:
   resources:
     requests:
-      storage: 10Gi
+      storage: 10Gi                # Requests 10Gi of storage
 
-  volumeMode: Filesystem
+  volumeMode: Filesystem            # Requests the volume as a filesystem
 
   accessModes:
-    - ReadWriteMany
+    - ReadWriteMany                 # Requests shared read/write access
 
-  volumeName: nfs-pv
+  volumeName: nfs-pv                # Explicitly binds this PVC to nfs-pv
 ```
 
 ### Pod/Deployment
 
 ```yaml
 volumes:
-  - name: shared-data
+  - name: shared-data               # Name of the Pod volume
     persistentVolumeClaim:
-      claimName: nfs-pvc
+      claimName: nfs-pvc            # Uses the NFS PVC
 ```
 
 Mount it:
 
 ```yaml
 volumeMounts:
-  - name: shared-data
-    mountPath: /data
+  - name: shared-data               # References the shared volume
+    mountPath: /data                # Mounts the volume at /data
 ```
 
 ---
@@ -693,8 +695,8 @@ volumeMounts:
 Check:
 
 ```cmd
-kubectl get pv
-kubectl get pvc
+kubectl get pv                       # Shows the NFS PersistentVolume
+kubectl get pvc                      # Shows the NFS PersistentVolumeClaim
 ```
 
 Expected:
@@ -707,26 +709,26 @@ nfs-pvc    Bound
 Then:
 
 ```cmd
-kubectl get pods
+kubectl get pods                     # Lists the Pods using the storage
 ```
 
 Enter:
 
 ```cmd
-kubectl exec -it <pod-name> -- bash
+kubectl exec -it <pod-name> -- bash  # Opens a shell inside the Pod
 ```
 
 Test:
 
 ```bash
-echo "NFS test" > /data/test.txt
-cat /data/test.txt
+echo "NFS test" > /data/test.txt    # Writes a file to the shared NFS storage
+cat /data/test.txt                  # Reads the file from the shared storage
 ```
 
 If another Pod can access the same:
 
 ```bash
-cat /data/test.txt
+cat /data/test.txt                  # Reads the same file from the shared storage
 ```
 
 then both Pods are accessing the same shared NFS storage.
@@ -848,26 +850,26 @@ The exact YAML depends on the CSI driver.
 A generic CSI PV looks like:
 
 ```yaml
-apiVersion: v1
-kind: PersistentVolume
+apiVersion: v1                     # Uses the core Kubernetes API
+kind: PersistentVolume             # Creates a PersistentVolume
 
 metadata:
-  name: csi-pv
+  name: csi-pv                     # Name of the CSI PV
 
 spec:
   capacity:
-    storage: 10Gi
+    storage: 10Gi                  # Advertises 10Gi of storage
 
-  volumeMode: Filesystem
+  volumeMode: Filesystem           # Makes the volume available as a filesystem
 
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOnce                # Allows read/write access from one node
 
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Delete # Deletes the storage when the claim is deleted
 
   csi:
-    driver: <csi-driver-name>
-    volumeHandle: <volume-id>
+    driver: <csi-driver-name>      # Name of the CSI driver managing the storage
+    volumeHandle: <volume-id>      # Provider-specific identifier for the storage volume
 ```
 
 The values:
@@ -886,40 +888,40 @@ So don't blindly copy a CSI configuration from AWS into Azure or another cluster
 ## CSI PVC
 
 ```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
+apiVersion: v1                     # Uses the core Kubernetes API
+kind: PersistentVolumeClaim        # Creates a PersistentVolumeClaim
 
 metadata:
-  name: csi-pvc
+  name: csi-pvc                    # Name of the CSI PVC
 
 spec:
   resources:
     requests:
-      storage: 10Gi
+      storage: 10Gi                # Requests 10Gi of storage
 
-  volumeMode: Filesystem
+  volumeMode: Filesystem            # Requests the volume as a filesystem
 
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOnce                 # Requests read/write access from one node
 
-  volumeName: csi-pv
+  volumeName: csi-pv                # Explicitly binds this PVC to csi-pv
 ```
 
 Then a Deployment uses:
 
 ```yaml
 volumes:
-  - name: app-storage
+  - name: app-storage               # Name of the Pod volume
     persistentVolumeClaim:
-      claimName: csi-pvc
+      claimName: csi-pvc            # Uses the CSI PVC
 ```
 
 and:
 
 ```yaml
 volumeMounts:
-  - name: app-storage
-    mountPath: /data
+  - name: app-storage               # References the CSI volume
+    mountPath: /data                # Mounts the volume at /data
 ```
 
 ---
@@ -984,7 +986,7 @@ Single Node
 
 ```yaml
 accessModes:
-  - ReadWriteOnce
+  - ReadWriteOnce                  # Allows read/write access from one node
 ```
 
 Useful for:
@@ -1025,7 +1027,7 @@ Read Only
 
 ```yaml
 accessModes:
-  - ReadOnlyMany
+  - ReadOnlyMany                   # Allows read-only access from multiple nodes
 ```
 
 Example:
@@ -1061,7 +1063,7 @@ Read + Write
 
 ```yaml
 accessModes:
-  - ReadWriteMany
+  - ReadWriteMany                   # Allows read/write access from multiple nodes
 ```
 
 Example:
@@ -1085,7 +1087,7 @@ Simply writing:
 
 ```yaml
 accessModes:
-  - ReadWriteMany
+  - ReadWriteMany                   # Requests shared read/write access
 ```
 
 doesn't magically make a storage backend support it.
@@ -1127,13 +1129,13 @@ PV available
 Example:
 
 ```cmd
-kubectl apply -f My-Pv.yml
+kubectl apply -f My-Pv.yml          # Creates the PersistentVolume
 ```
 
 Check:
 
 ```cmd
-kubectl get pv
+kubectl get pv                      # Shows PersistentVolumes
 ```
 
 ---
@@ -1153,14 +1155,14 @@ Bind
 Example:
 
 ```cmd
-kubectl apply -f My-Pvc.yml
+kubectl apply -f My-Pvc.yml         # Creates the PersistentVolumeClaim
 ```
 
 Check:
 
 ```cmd
-kubectl get pv
-kubectl get pvc
+kubectl get pv                      # Checks the PV binding state
+kubectl get pvc                     # Checks the PVC binding state
 ```
 
 Expected:
@@ -1192,17 +1194,17 @@ Deployment:
 
 ```yaml
 volumes:
-  - name: data
+  - name: data                    # Name of the Pod volume
     persistentVolumeClaim:
-      claimName: mypvc
+      claimName: mypvc            # Uses the PVC named mypvc
 ```
 
 Mount:
 
 ```yaml
 volumeMounts:
-  - name: data
-    mountPath: /data
+  - name: data                    # References the volume defined above
+    mountPath: /data               # Mounts the storage at /data
 ```
 
 Now the application can use:
@@ -1258,15 +1260,13 @@ It is **deprecated/not the policy to use for modern Kubernetes setups**.
 For your current Kubernetes learning environment, prefer:
 
 ```yaml
-persistentVolumeReclaimPolicy: Delete
+persistentVolumeReclaimPolicy: Delete   # Deletes the storage when the PVC is deleted
 ```
 
 or:
 
 ```yaml
-persistentVolumeReclaimPolicy: Retain
+persistentVolumeReclaimPolicy: Retain   # Keeps the PV/storage so the data can be preserved
 ```
 
 depending on the desired data lifecycle.
-
----

@@ -1,4 +1,4 @@
-# Kubernetes Persistent Volumes (PV)
+# Kubernetes Persistent Volumes Static Provisioning (PV)
 
 ---
 

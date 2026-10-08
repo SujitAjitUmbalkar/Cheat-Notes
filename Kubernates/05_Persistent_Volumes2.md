@@ -1,4 +1,3 @@
-
 # Dynamic Provisioning in Kubernetes
 
 ---
@@ -10,29 +9,31 @@
 In static provisioning:
 
 ```text
-Admin creates PV
-      ↓
-PVC
-      ↓
-Pod
+Admin creates PV 
+      ↓ 
+PVC 
+      ↓ 
+Pod 
+
 ```
 
 In dynamic provisioning:
 
 ```text
-PVC
- ↓
-StorageClass
- ↓
-Provisioner
- ↓
-Storage is created
- ↓
-PV is created automatically
- ↓
-PVC becomes Bound
- ↓
-Pod uses PVC
+PVC 
+ ↓ 
+StorageClass 
+ ↓ 
+Provisioner 
+ ↓ 
+Storage is created 
+ ↓ 
+PV is created automatically 
+ ↓ 
+PVC becomes Bound 
+ ↓ 
+Pod uses PVC 
+
 ```
 
 The key idea is:
@@ -53,9 +54,10 @@ The key idea is:
 **Remember:**
 
 ```text
-Static  → PV → PVC → Pod
+Static  → PV → PVC → Pod 
+ 
+Dynamic → PVC → StorageClass → PV → Pod 
 
-Dynamic → PVC → StorageClass → PV → Pod
 ```
 
 ---
@@ -69,71 +71,180 @@ A **StorageClass** tells Kubernetes:
 Example:
 
 ```yaml
+apiVersion: storage.k8s.io/v1 
+kind: StorageClass 
+ 
+metadata: 
+  name: fast-storage 
+ 
+provisioner: example.com/storage   # Example only; real provisioner depends on cluster 
+
+```
+
+In real environments, the provisioner is connected to a storage system/provider. The uploaded material describes StorageClasses as specifying storage types/configuration and provisioners that manage the actual storage.
+
+### Important: Docker Desktop Provisioner
+
+For your **Docker Desktop Kubernetes cluster**, Docker Desktop provides a storage provisioner. A commonly used provisioner is:
+
+```text
+docker.io/hostpath
+```
+
+So when you create your own StorageClass on Docker Desktop, you can use:
+
+```yaml
+provisioner: docker.io/hostpath
+```
+
+This is **specific to the Docker Desktop environment**.
+
+In other Kubernetes environments, such as GKE, AWS, or Azure, the provisioner will be different because the underlying storage system is different.
+
+---
+
+# 4. Create a Valid StorageClass
+
+For your **Docker Desktop Kubernetes cluster**, we can create a StorageClass using Docker Desktop's `docker.io/hostpath` provisioner.
+
+Save this as:
+
+```text
+Storage-Class.yml
+
+```
+
+```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 
 metadata:
   name: fast-storage
 
-provisioner: example.com/storage   # Example only; real provisioner depends on cluster
+provisioner: docker.io/hostpath   # Docker Desktop storage provisioner
+
 ```
 
-In real environments, the provisioner is connected to a storage system/provider. The uploaded material describes StorageClasses as specifying storage types/configuration and provisioners that manage the actual storage. 
+### Apply the StorageClass
 
----
+```cmd
+kubectl apply -f Storage-Class.yml
 
-# 4. Check Existing StorageClasses
+```
+
+Expected:
+
+```text
+storageclass.storage.k8s.io/fast-storage created
+
+```
+
+### Validate
 
 ```cmd
 kubectl get storageclass
+
 ```
 
 or:
 
 ```cmd
 kubectl get sc
+
+```
+
+You should see something similar to:
+
+```text
+NAME                     PROVISIONER
+fast-storage             docker.io/hostpath
+
 ```
 
 To see details:
 
 ```cmd
-kubectl describe storageclass <storage-class-name>
+kubectl describe storageclass fast-storage
+
+```
+
+### Important
+
+The StorageClass itself does **not create a PV immediately**.
+
+```text
+StorageClass created
+       ↓
+No PV yet
+       ↓
+PVC requests storage
+       ↓
+Provisioner creates storage
+       ↓
+PV is created
+
+```
+
+---
+
+# 5. Check Existing StorageClasses
+
+```cmd
+kubectl get storageclass 
+
+```
+
+or:
+
+```cmd
+kubectl get sc 
+
+```
+
+To see details:
+
+```cmd
+kubectl describe storageclass <storage-class-name> 
+
 ```
 
 Example:
 
 ```cmd
-kubectl describe storageclass standard
+kubectl describe storageclass standard 
+
 ```
 
 ---
 
-# 5. Create a PVC for Dynamic Provisioning
+# 6. Create a PVC for Dynamic Provisioning
 
 The important part is:
 
 ```yaml
-storageClassName: standard
+storageClassName: fast-storage 
+
 ```
 
 Example:
 
 ```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
+apiVersion: v1 
+kind: PersistentVolumeClaim 
+ 
+metadata: 
+  name: dynamic-pvc 
+ 
+spec: 
+  storageClassName: fast-storage   # Ask this StorageClass to provision storage 
+ 
+  accessModes: 
+    - ReadWriteOnce 
+ 
+  resources: 
+    requests: 
+      storage: 1Gi             # Request 1Gi of storage 
 
-metadata:
-  name: dynamic-pvc
-
-spec:
-  storageClassName: standard   # Ask this StorageClass to provision storage
-
-  accessModes:
-    - ReadWriteOnce
-
-  resources:
-    requests:
-      storage: 1Gi             # Request 1Gi of storage
 ```
 
 ### Important
@@ -141,51 +252,58 @@ spec:
 Notice that we **do not create a PV YAML**.
 
 ```text
-PVC → StorageClass → Kubernetes creates PV automatically
+PVC → StorageClass → Kubernetes creates PV automatically 
+
 ```
 
 ---
 
-# 6. Apply the PVC
+# 7. Apply the PVC
 
 Save it as:
 
 ```text
-Dynamic-Pvc.yml
+Dynamic-Pvc.yml 
+
 ```
 
 Then:
 
 ```cmd
-kubectl apply -f Dynamic-Pvc.yml
+kubectl apply -f Dynamic-Pvc.yml 
+
 ```
 
 Expected:
 
 ```text
-persistentvolumeclaim/dynamic-pvc created
+persistentvolumeclaim/dynamic-pvc created 
+
 ```
 
 ---
 
-# 7. Validate the PVC
+# 8. Validate the PVC
 
 ```cmd
-kubectl get pvc
+kubectl get pvc 
+
 ```
 
 Initially, you may see:
 
 ```text
-NAME           STATUS    VOLUME   CAPACITY
-dynamic-pvc    Pending
+NAME           STATUS    VOLUME   CAPACITY 
+dynamic-pvc    Pending 
+
 ```
 
 After provisioning succeeds:
 
 ```text
-NAME           STATUS   VOLUME       CAPACITY   STORAGECLASS
-dynamic-pvc    Bound    pvc-xxxxx    1Gi        standard
+NAME           STATUS   VOLUME       CAPACITY   STORAGECLASS 
+dynamic-pvc    Bound    pvc-xxxxx    1Gi        fast-storage 
+
 ```
 
 ### Important
@@ -193,140 +311,185 @@ dynamic-pvc    Bound    pvc-xxxxx    1Gi        standard
 `Bound` means:
 
 ```text
-PVC successfully connected to a PV
+PVC successfully connected to a PV 
+
 ```
 
 ---
 
-# 8. Check the Automatically Created PV
+# 9. Check the Automatically Created PV
 
 Run:
 
 ```cmd
-kubectl get pv
+kubectl get pv 
+
 ```
 
 You should see something like:
 
 ```text
-NAME        CAPACITY   STATUS   CLAIM                   STORAGECLASS
-pvc-xxxxx   1Gi        Bound    default/dynamic-pvc     standard
+NAME        CAPACITY   STATUS   CLAIM                   STORAGECLASS 
+pvc-xxxxx   1Gi        Bound    default/dynamic-pvc     fast-storage 
+
 ```
 
 Notice:
 
 ```text
-PVC
-dynamic-pvc
-    ↓
-PV
-pvc-xxxxx
+PVC 
+dynamic-pvc 
+    ↓ 
+PV 
+pvc-xxxxx 
+
 ```
 
 The PV was created **automatically**.
 
 ---
 
-# 9. Verify the Complete Binding
+# 10. Verify the Complete Binding
 
 You can inspect both sides:
 
 ```cmd
-kubectl get pvc dynamic-pvc
+kubectl get pvc dynamic-pvc 
+
 ```
 
 and:
 
 ```cmd
-kubectl get pv
+kubectl get pv 
+
 ```
 
 Or:
 
 ```cmd
-kubectl describe pvc dynamic-pvc
+kubectl describe pvc dynamic-pvc 
+
 ```
 
 Check:
 
 ```text
-StorageClass
-Volume
-Status
-Events
+StorageClass 
+Volume 
+Status 
+Events 
+
 ```
 
 The expected relationship is:
 
 ```text
-StorageClass: standard
+StorageClass: fast-storage 
+ 
+       ↓ 
+ 
+PVC: dynamic-pvc 
+ 
+       ↓ 
+ 
+PV: pvc-xxxxx 
+ 
+       ↓ 
+ 
+Actual storage 
 
-       ↓
-
-PVC: dynamic-pvc
-
-       ↓
-
-PV: pvc-xxxxx
-
-       ↓
-
-Actual storage
 ```
 
 ---
 
-# 10. Use the PVC in a Pod
+# 11. Use the PVC in a Deployment
 
-Now create a Pod that uses the PVC.
+Now create a Deployment that uses the PVC.
 
 ```yaml
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 
 metadata:
-  name: storage-test
+  name: storage-test-deployment
 
 spec:
-  containers:
-    - name: nginx
-      image: nginx
+  replicas: 1
 
-      volumeMounts:
+  selector:
+    matchLabels:
+      app: storage-test
+
+  template:
+    metadata:
+      labels:
+        app: storage-test
+
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+
+          volumeMounts:
+            - name: data
+              mountPath: /data
+
+      volumes:
         - name: data
-          mountPath: /data
+          persistentVolumeClaim:
+            claimName: dynamic-pvc   # Connect Deployment Pods to the PVC
 
-  volumes:
-    - name: data
-      persistentVolumeClaim:
-        claimName: dynamic-pvc   # Connect Pod to the PVC
+```
+
+Save it as:
+
+```text
+Deployment.yml
+
 ```
 
 Apply:
 
 ```cmd
-kubectl apply -f Pod.yml
-```
+kubectl apply -f Deployment.yml
 
----
-
-# 11. Validate the Pod
-
-```cmd
-kubectl get pods
 ```
 
 Expected:
 
 ```text
-NAME            READY   STATUS
-storage-test    1/1     Running
+deployment.apps/storage-test-deployment created
+
+```
+
+### Validate the Deployment
+
+```cmd
+kubectl get deployment
+
+```
+
+Then:
+
+```cmd
+kubectl get pods
+
+```
+
+Expected:
+
+```text
+NAME                                      READY   STATUS
+storage-test-deployment-xxxxx-xxxxx       1/1     Running
+
 ```
 
 You can check the Pod's volume:
 
 ```cmd
-kubectl describe pod storage-test
+kubectl describe pod <pod-name>
+
 ```
 
 Look under:
@@ -334,6 +497,7 @@ Look under:
 ```text
 Volumes
 Mounts
+
 ```
 
 ---
@@ -343,31 +507,36 @@ Mounts
 Enter the Pod:
 
 ```cmd
-kubectl exec -it storage-test -- sh
+kubectl exec -it <pod-name> -- sh
+
 ```
 
 Create a file:
 
 ```bash
-echo "Hello Kubernetes" > /data/test.txt
+echo "Hello Kubernetes" > /data/test.txt 
+
 ```
 
 Check it:
 
 ```bash
-cat /data/test.txt
+cat /data/test.txt 
+
 ```
 
 Expected:
 
 ```text
-Hello Kubernetes
+Hello Kubernetes 
+
 ```
 
 Exit:
 
 ```bash
-exit
+exit 
+
 ```
 
 ---
@@ -377,37 +546,40 @@ exit
 Delete the Pod:
 
 ```cmd
-kubectl delete pod storage-test
+kubectl delete pod <pod-name> 
+
 ```
 
-Create the Pod again:
-
-```cmd
-kubectl apply -f Pod.yml
-```
+Because this Pod is managed by a **Deployment**, Kubernetes automatically creates a replacement Pod.
 
 Check:
 
 ```cmd
 kubectl get pods
+
 ```
 
-Then enter the new Pod:
+Wait until the new Pod is `Running`.
+
+Then enter the **new Pod**:
 
 ```cmd
-kubectl exec -it storage-test -- sh
+kubectl exec -it <new-pod-name> -- sh
+
 ```
 
 Check:
 
 ```bash
-cat /data/test.txt
+cat /data/test.txt 
+
 ```
 
 Expected:
 
 ```text
-Hello Kubernetes
+Hello Kubernetes 
+
 ```
 
 ### Why is the data still there?
@@ -415,17 +587,18 @@ Hello Kubernetes
 Because:
 
 ```text
-Pod deleted
-   ↓
-PVC still exists
-   ↓
-PV still exists
-   ↓
-Actual storage still exists
-   ↓
-New Pod mounts the same PVC
-   ↓
-Old data available ✅
+Pod deleted 
+   ↓ 
+PVC still exists 
+   ↓ 
+PV still exists 
+   ↓ 
+Actual storage still exists 
+   ↓ 
+New Pod mounts the same PVC 
+   ↓ 
+Old data available ✅ 
+
 ```
 
 ---
@@ -437,11 +610,12 @@ Old data available ✅
 Kubernetes looks for a **suitable existing PV** based on the PVC's requirements.
 
 ```text
-PVC
- ↓
-Find matching available PV
- ↓
-Bind
+PVC 
+ ↓ 
+Find matching available PV 
+ ↓ 
+Bind 
+
 ```
 
 ### Dynamic provisioning
@@ -449,9 +623,10 @@ Bind
 The PVC uses its StorageClass to request **new storage**.
 
 ```text
-PVC-A → StorageClass → New PV-A
+PVC-A → StorageClass → New PV-A 
+ 
+PVC-B → StorageClass → New PV-B 
 
-PVC-B → StorageClass → New PV-B
 ```
 
 So you don't need to worry about Kubernetes randomly choosing one of several PVs during normal dynamic provisioning.
@@ -465,36 +640,39 @@ A **new dynamically provisioned PV gives you new storage**. It does not automati
 For old data, you need the existing storage:
 
 ```text
-Old data
-   ↓
-Existing PV
-   ↓
-Existing PVC
-   ↓
-New Pod
+Old data 
+   ↓ 
+Existing PV 
+   ↓ 
+Existing PVC 
+   ↓ 
+New Pod 
+
 ```
 
 The Pod should use the existing PVC:
 
 ```yaml
-volumes:
-  - name: data
-    persistentVolumeClaim:
-      claimName: old-pvc
+volumes: 
+  - name: data 
+    persistentVolumeClaim: 
+      claimName: old-pvc 
+
 ```
 
 Then:
 
 ```text
-New Pod
-   ↓
-Existing PVC
-   ↓
-Existing PV
-   ↓
-Existing storage
-   ↓
-Last month's data
+New Pod 
+   ↓ 
+Existing PVC 
+   ↓ 
+Existing PV 
+   ↓ 
+Existing storage 
+   ↓ 
+Last month's data 
+
 ```
 
 If the PVC was deleted, whether the data can still be recovered depends on the PV's reclaim policy and the underlying storage.
@@ -506,78 +684,86 @@ If the PVC was deleted, whether the data can still be recovered depends on the P
 For dynamic provisioning, remember this practical sequence:
 
 ```text
-1. Check StorageClass
-   ↓
-kubectl get sc
+1. Create StorageClass
+   ↓ 
+kubectl apply -f Storage-Class.yml
 
-2. Create PVC
-   ↓
-kubectl apply -f Dynamic-Pvc.yml
+2. Check StorageClass 
+   ↓ 
+kubectl get sc 
+ 
+3. Create PVC 
+   ↓ 
+kubectl apply -f Dynamic-Pvc.yml 
+ 
+4. Check PVC 
+   ↓ 
+kubectl get pvc 
+ 
+5. Check automatically created PV 
+   ↓ 
+kubectl get pv 
+ 
+6. Check details/events 
+   ↓ 
+kubectl describe pvc dynamic-pvc 
+ 
+7. Create Deployment using PVC 
+   ↓ 
+kubectl apply -f Deployment.yml 
+ 
+8. Check Pods 
+   ↓ 
+kubectl get pods 
+ 
+9. Write data 
+   ↓ 
+kubectl exec -it <pod-name> -- sh 
+ 
+10. Delete Pod and let Deployment recreate it
 
-3. Check PVC
-   ↓
-kubectl get pvc
+11. Check whether the data is still present 
 
-4. Check automatically created PV
-   ↓
-kubectl get pv
-
-5. Check details/events
-   ↓
-kubectl describe pvc dynamic-pvc
-
-6. Create Pod using PVC
-   ↓
-kubectl apply -f Pod.yml
-
-7. Check Pod
-   ↓
-kubectl get pods
-
-8. Write data
-   ↓
-kubectl exec -it storage-test -- sh
-
-9. Delete Pod and recreate it
-
-10. Check whether the data is still present
 ```
 
 ### Final mental model
 
 ```text
-                 Dynamic Provisioning
+                 Dynamic Provisioning 
+ 
+Developer 
+    ↓ 
+  PVC 
+    ↓ 
+StorageClass 
+    ↓ 
+Provisioner 
+    ↓ 
+Actual storage created 
+    ↓ 
+PV automatically created 
+    ↓ 
+PVC ←→ PV 
+    ↓ 
+  Pod 
+    ↓ 
+Uses persistent data 
 
-Developer
-    ↓
-  PVC
-    ↓
-StorageClass
-    ↓
-Provisioner
-    ↓
-Actual storage created
-    ↓
-PV automatically created
-    ↓
-PVC ←→ PV
-    ↓
-  Pod
-    ↓
-Uses persistent data
 ```
 
 **Most important commands:**
 
 ```cmd
+kubectl apply -f Storage-Class.yml
 kubectl get sc
-kubectl apply -f Dynamic-Pvc.yml
-kubectl get pvc
-kubectl get pv
-kubectl describe pvc dynamic-pvc
-kubectl apply -f Pod.yml
-kubectl get pods
-kubectl exec -it storage-test -- sh
+kubectl apply -f Dynamic-Pvc.yml 
+kubectl get pvc 
+kubectl get pv 
+kubectl describe pvc dynamic-pvc 
+kubectl apply -f Deployment.yml 
+kubectl get pods 
+kubectl exec -it <pod-name> -- sh 
+
 ```
 
 This gives you the full **create → provision → bind → use → test persistence** workflow.

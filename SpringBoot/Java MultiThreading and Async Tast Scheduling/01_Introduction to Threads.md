@@ -46,11 +46,23 @@ Java defines six thread states through `Thread.State`.
 
 ### Important methods
 
-- `start()` — Starts a new thread of execution.
-- `run()` — Contains the task's code; calling it directly does not start a new thread.
-- `sleep(time)` — Pauses the current thread for a specified time.
-- `join()` — Waits for another thread to finish.
-- `getState()` — Returns the thread's current Java state.
+## Important Thread Methods in Java
+
+- **`start()`** — Starts a new thread of execution. The JVM schedules the new thread to execute its `run()` method independently of the thread that called `start()`. The calling thread can continue executing without waiting for the new thread to finish.
+
+- **`run()`** — Contains the task's code that the thread executes. When `start()` is called, the new thread executes `run()`. However, if you call `run()` directly like a normal method, the code executes on the current thread, and no new thread is created.
+
+- **`sleep(time)`** — Pauses the currently executing thread for the specified duration. For example, `Thread.sleep(5000)` pauses the current thread for approximately 5 seconds. During this time, the thread does not execute its task, allowing other threads to run. It throws `InterruptedException` if the thread is interrupted while sleeping.
+
+- **`join()`** — Makes the thread calling `join()` wait until the target thread finishes its execution. For example, `workerThread.join()` called from the `main` thread blocks `main` until `workerThread` terminates. Use it when one thread must wait for another thread's result or completion; avoid it when the calling thread needs to continue without waiting.
+
+- **`getState()`** — Returns the current state of a thread, such as `NEW`, `RUNNABLE`, `BLOCKED`, `WAITING`, `TIMED_WAITING`, or `TERMINATED`. It is useful for understanding a thread's lifecycle while debugging. The returned state is only a snapshot and may change immediately afterward.
+
+- **`currentThread()`** — Returns a reference to the thread that is currently executing the code. For example, `Thread.currentThread().getName()` returns the current thread's name, and `Thread.currentThread().getState()` returns its current Java state.
+
+- **`getName()`** — Returns the name assigned to a thread. Thread names are useful for identifying which thread is executing a log statement, especially when debugging multithreaded applications.
+
+- **`interrupt()`** — Sends an interruption request to a thread. If the thread is sleeping or waiting in an interruptible operation, it may receive an `InterruptedException`. Interruption does not forcibly terminate the thread; the thread's code should handle the request appropriately.
 
 **Remember:** `RUNNABLE` includes both running and ready-to-run conditions.
 

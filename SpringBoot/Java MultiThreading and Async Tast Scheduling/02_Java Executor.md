@@ -320,6 +320,7 @@ public class Main {
 ## 7. Creating pools with Executors
 
 `Executors` is a utility class with factory methods. They make common executor configurations easier to create.
+when you use these , default configuration of Pool and Task Queue is Used internally.
 
 ### A. Fixed thread pool
 

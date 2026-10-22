@@ -116,6 +116,33 @@ In this example, I made a simple custom `Executor` that starts a new thread for 
 | Failure observation | Depends on executor/execution context | Task failure can be observed from `Future.get()` |
 
 I use `execute()` when I only need to submit work. I use `submit()` when I may need a `Future` to check completion, cancel, or retrieve a result.
+---
+# NOTE
+
+### Note: Instantiating `Executor` vs. `ExecutorService` in Java
+
+---
+
+###  The Core Rule: Interfaces vs. Concrete Classes
+
+* Both `Executor` and `ExecutorService` are Java **interfaces**, meaning they cannot be instantiated directly using the `new` keyword (doing so triggers a compilation error stating they are abstract and cannot be instantiated).
+* To use them, developers must either supply a custom implementation or utilize Java's built-in concrete implementation classes.
+
+###  Instantiating the `Executor` Interface
+
+* Because `Executor` is a **Functional Interface** containing only a single abstract execution method, it can be instantiated very simply.
+* **Anonymous Inner Classes:** Developers can define an inline, unnamed implementation of the interface directly where it is needed, overriding its single method to dictate how commands run (such as spawning a brand-new thread for every task).
+* **Lambda Expressions:** Given its single-method nature, a lambda expression can replace the anonymous class entirely, providing a concise and clean way to implement the interface on the fly.
+
+
+###  Instantiating the `ExecutorService` Interface
+
+* In contrast to `Executor`, `ExecutorService` contains multiple abstract methods responsible for managing a comprehensive lifecycle (including task submission, shutdown sequences, future tracking, and queue management).
+* **Why Lambdas and Anonymous Classes Fail:** Lambdas cannot be used because the interface has multiple abstract methods. While writing an anonymous inner class is syntactically possible, it is highly impractical because it forces the developer to manually write boilerplate overrides for dozens of distinct lifecycle and invocation methods.
+* **The Correct Approach (Concrete Classes):** `ExecutorService` should always be instantiated using Java's built-in concrete implementation classes from the concurrent package:
+* **`ThreadPoolExecutor`:** The standard, highly customizable class used to manage core and maximum pool sizes, task queueing, and idle thread timeouts.
+* **`ScheduledThreadPoolExecutor`:** A specialized subclass tailored specifically for delayed or recurring task scheduling.
+* **`ForkJoinPool`:** An optimization-focused class designed for work-stealing algorithms and recursive, divide-and-conquer workloads.
 
 ---
 

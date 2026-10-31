@@ -20,9 +20,8 @@ In simple words: Stripe acts as a bridge between your application, customers and
 
 ## 2. How Stripe Payment Works
 
-[Integrating Stripe Checkout a complete practical Guide](https://images.openai.com/static-rsc-4/6w9cfpSo-LhjH0h3DsHCbh4IrgtqwavGQO46hSQ7R1PKY6h5-ULumH0HWbmbE5Ps2n7MDuUiVnFBH9HhHImfJIgQtL1ZDMqgsVgk-2ogUgZ67qipwORK0azdhgysfAe1cNz0tJkRblgV87kAT2hRcC1c5-4nVgsNc6P9kVp099k?purpose=inline)
+<img width="1279" height="720" alt="Stripe_Payment_Workflow" src="https://github.com/user-attachments/assets/975135d9-7bb0-4a90-bd84-b8001f5cea3c" />
 
-[linkedin.com](https://www.linkedin.com/pulse/integrating-stripe-checkout-complete-practical-guide-singh-srjlc?utm_source=chatgpt.com)
 
 1. Customer clicks Pay Now.
 2. Frontend calls Spring Boot backend.
@@ -368,6 +367,8 @@ async function makePayment() {
 
 The customer is now redirected to Stripe's hosted payment page.
 
+## Step 6 . Now you can run your application , go to checkout session url , fill data and check you are redirecting to success or failure
+
 ## Step 7. Success and Cancel Endpoints
 
 ```
@@ -458,61 +459,6 @@ Important webhook methods:
 
 Handle delayed payment success and failure events separately when using payment methods that support delayed confirmation.
 
-# 6. Testing Stripe Integration
-
-Stripe provides a test mode to test payments without real money.
-
-Step 1. Create an account: [Stripe Dashboard](https://dashboard.stripe.com/register?utm_source=chatgpt.com).
-
-Step 2. Get test API keys from Developers → API keys.
-
-Step 3. Set environment variables in Windows CMD:
-
-```
-set STRIPE_SECRET_KEY=sk_test_xxxxx
-```
-
-Step 4. Install and authenticate Stripe CLI.
-
-```
-stripe login
-```
-
-Step 5. Forward webhook events to localhost:
-
-```
-stripe listen --forward-to localhost:8080/api/payments/webhook
-```
-
-Copy the generated webhook signing secret:
-
-```
-set STRIPE_WEBHOOK_SECRET=whsec_xxxxx
-```
-
-Restart Spring Boot after setting both variables.
-
-Step 6. Call API through Postman:
-
-```
-POST http://localhost:8080/api/payments/checkout
-```
-
-Step 7. Open the returned URL and use the test card:
-
-Stripe test card
-
-# 4242 4242 4242 4242
-
-&#x20;Copy card number
-
-| Field  | Value                |
-| ------ | -------------------- |
-| Expiry | Any future date      |
-| CVC    | Any 3 digits         |
-| ZIP    | Any valid test value |
-
-Step 8. Complete payment and check Spring Boot logs for webhook confirmation.
 
 # 7. Database Integration (Real-world application)
 

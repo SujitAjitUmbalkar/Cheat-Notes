@@ -1,6 +1,5 @@
 # Stripe Payment Integration – Spring Boot Notes
 
-Concise documentation · Concepts + working code structure · Revision friendly
 
 ## 1. What is Stripe?
 

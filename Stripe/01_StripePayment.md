@@ -6,6 +6,7 @@
 ## 1. What is Stripe?
 
 Stripe is an online payment processing platform that allows applications to accept payments from customers.
+a way of transferring money
 
 Example: A customer purchases a product worth ₹500. Stripe processes the payment by communicating with the payment networks and banks.
 

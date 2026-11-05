@@ -1,6 +1,6 @@
 
 **VS Code:** Kubernetes extension → create `.yml` → use YAML autocomplete/snippets → fill `apiVersion → kind → metadata → spec`.
-
+---
 
 # 1. Pod YAML
 

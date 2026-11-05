@@ -9,8 +9,8 @@ Example repository:
 
 ---
 
-## 🔹 Step 1: Find an Issue
-
+## 🔹 Step 1: Find an Issue 
+steps - 
 Go to Issues tab → filter:
 
 * `good first issue`

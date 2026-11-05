@@ -4,7 +4,7 @@
 
 You have applications running in containers.
 
-With a small application:
+With a small application:-
 
 ```text
 Container 1

@@ -153,6 +153,30 @@ whsec_xxxxxxxxxxxxxxxxx
 
 > **Important:** Copy this `whsec_` secret. We'll use it in Spring Boot to verify incoming webhook requests.
 
+
+--- 
+# NOTE
+ To listen only to the specific webhook events your application actually handles (rather than flooding your terminal with every event Stripe generates), use the `--events` (or `-e`) flag.
+
+### The Command
+
+Run the Stripe CLI listen command with your required event types separated by commas:
+
+```bash
+stripe listen --forward-to localhost:8080/api/stripe/webhook --events checkout.session.completed,customer.subscription.updated,customer.subscription.deleted
+
+```
+
+### Common Events for Subscription/Course-Selling Apps:
+
+* **`checkout.session.completed`**: Fires when a customer finishes the checkout process; used to grant access or record the initial order.
+* **`customer.subscription.updated`**: Fires when a subscription changes (e.g., renewed, upgraded, or payment fails).
+* **`customer.subscription.deleted`**: Fires when a subscription is fully canceled or expires; used to revoke user access.
+
+* **Event Filtering:** By default, `stripe listen` forwards every single event generated in your test environment to your local server. Filtering with `--events` restricts the stream to only the specific webhooks your code implements, keeping your terminal logs clean, focused, and free of unnecessary background noise.
+
+---
+
 ### Remember These Three Commands:
 
 | Command | Purpose |

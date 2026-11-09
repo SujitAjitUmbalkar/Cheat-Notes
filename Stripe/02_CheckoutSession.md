@@ -8,6 +8,8 @@ Stripe creates a hosted checkout page where customers enter their payment detail
 
 Example: A customer adds a laptop and a mouse to the cart. Your Spring Boot backend creates one Checkout Session containing both products. Stripe displays both products on its checkout page.
 
+---
+
 ## 2. How Checkout Session Works
 
 ```

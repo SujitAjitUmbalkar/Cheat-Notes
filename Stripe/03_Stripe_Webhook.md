@@ -18,8 +18,6 @@ A webhook is a mechanism that allows one application to automatically notify ano
 
 > **Important:** Stripe does not depend on the customer returning to your success URL to notify your backend. It sends a separate, reliable HTTP POST request directly to your webhook endpoint.
 
----
-
 ## 2. Why Do We Need Webhooks?
 
 Consider this situation:

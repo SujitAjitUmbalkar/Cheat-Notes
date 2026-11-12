@@ -2,8 +2,6 @@
 # 🚀 PART 1 — Important Steps for Open Source Contribution 
 PiyushGarg
 
----
-
 ## ✅ 1️⃣ Choose the Right Repository
 
 * Pick project related to your stack (Spring Boot, Java etc.)

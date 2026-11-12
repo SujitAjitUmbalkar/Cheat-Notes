@@ -1,5 +1,5 @@
 The best alternative is **Qdrant**. It runs in a single Docker command with zero password or user authentication hassles, has native Spring AI support, and includes a **built-in Web Dashboard** at `http://localhost:6333/dashboard` so you can visually inspect your vector collections without needing DBeaver.
-
+---
 1. **Run Qdrant Container:** Docker CMD.
 Run Qdrant with a single line in your command prompt:
 

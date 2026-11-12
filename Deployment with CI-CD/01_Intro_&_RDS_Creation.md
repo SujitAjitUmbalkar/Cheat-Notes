@@ -153,3 +153,6 @@ Example:
 
 ---
 Security groups act like firewalls for AWS resources.
+
+these are the notes for RDS creation
+---

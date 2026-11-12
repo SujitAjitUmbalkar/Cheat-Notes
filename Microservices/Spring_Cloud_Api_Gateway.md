@@ -1,5 +1,5 @@
 ## 1. What is API Gateway?
-
+---
 * **Single Entry Point** for all client requests in a Microservices architecture.
 * Receives client requests and forwards them to the correct microservice.
 

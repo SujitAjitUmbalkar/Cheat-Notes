@@ -410,3 +410,5 @@ Gateway Filters
 ```
 
 **Remember:** These are **built-in GatewayFilter factories**, so by default they apply to a **specific route**. If you configure them under **`default-filters`**, the same built-in filters apply to **all routes**. `GlobalFilter` is a separate interface used for custom logic that runs for every request.
+end
+---

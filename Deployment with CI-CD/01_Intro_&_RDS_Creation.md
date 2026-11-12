@@ -1,4 +1,6 @@
-## Short Notes on Amazon Web Services
+# Short Notes on Amazon Web Services
+
+---
 
 * AWS is a cloud computing platform provided by Amazon.
   It offers servers, storage, databases, networking, and security services online.

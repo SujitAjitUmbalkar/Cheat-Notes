@@ -72,13 +72,33 @@ void execute(Runnable command);
 ### Runnable example
 
 ```java
-Runnable task = () -> {
-    System.out.println("Hello from the task");
-};
+public class Main {
 
-Executor executor = command -> new Thread(command).start();
-executor.execute(task);
+    public static void main(String[] args) {
 
+        // 1. Create a task
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Hello from the task");
+            }
+        };
+
+        // 2. Create an Executor implementation
+        Executor executor = new Executor() {
+            @Override
+            public void execute(Runnable command) {
+
+                // Create a new thread and start it
+                Thread thread = new Thread(command);
+                thread.start();
+            }
+        };
+
+        // 3. Submit the task
+        executor.execute(task);
+    }
+}
 ```
 
 In this example, I made a simple custom `Executor` that starts a new thread for each task. Another `Executor` implementation could reuse a pooled thread or run the task in the caller's thread. So `execute()` does not guarantee that a new thread is created.

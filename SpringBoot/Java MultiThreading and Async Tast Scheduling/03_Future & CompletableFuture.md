@@ -27,6 +27,13 @@ try (ExecutorService executor = Executors.newFixedThreadPool(4)) {
 
     Future<String> future = executor.submit(task);
 
+    // Repeatedly check whether the task is completed.
+    // This is called polling.
+    while (!future.isDone()) {
+        log.info("Task is still running...");
+    }
+
+    // Once completed, get() returns the result without waiting.
     log.info("Result: {}", future.get());
 }
 ```

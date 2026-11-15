@@ -12,7 +12,7 @@
 | `docker image inspect <image>` | View detailed information about an image |
 | `docker image prune`           | Remove unused/dangling images            |
 
-### 2. Docker Container
+### 2. Docker Containers
 
 | Command                                     | Purpose                                      |
 | ------------------------------------------- | -------------------------------------------- |

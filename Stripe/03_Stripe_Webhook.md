@@ -1,7 +1,9 @@
 # Stripe Webhooks – Complete Notes (Spring Boot)
 
 <img width="1536" height="1024" alt="03_Stripe Webhooks_ From Payment to Backend_" src="https://github.com/user-attachments/assets/37a64ed4-f253-49ef-b546-89972f56cbc0" />
+
 ---
+
 ## 1. Introduction to Webhooks
 
 A webhook is a mechanism that allows one application to automatically notify another application when a specific event occurs. In Stripe, webhooks are used to notify your Spring Boot backend about payment-related events.

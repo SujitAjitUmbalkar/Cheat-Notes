@@ -1,4 +1,4 @@
-# Stripe Payment Integration – Spring Boot Notes
+# Stripe Payment Integration for Spring Boot 
 
 ---
 

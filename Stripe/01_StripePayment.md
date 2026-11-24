@@ -219,49 +219,54 @@ Why `@Bean`?
 public class PaymentService {
 
     private final StripeClient stripeClient;
+    private final ProductRepository productRepository;
 
-    public PaymentService(StripeClient stripeClient) {
+    public PaymentService(
+            StripeClient stripeClient,
+            ProductRepository productRepository) {
+
         this.stripeClient = stripeClient;
+        this.productRepository = productRepository;
     }
 
-    public String createCheckoutSession()
+    public String createCheckoutSession(Long productId)
             throws StripeException {
+
+        // Fetch selected product from database
+        Product product = productRepository
+                .findById(productId)
+                .orElseThrow(() ->
+                    new RuntimeException("Product not found")
+                );
 
         SessionCreateParams params =
                 SessionCreateParams.builder()
 
-                // One-time payment
                 .setMode(SessionCreateParams.Mode.PAYMENT)
 
-                // Redirect after successful checkout
-                .setSuccessUrl(
-                    "http://localhost:8080/success"
-                )
+                .setSuccessUrl("http://localhost:3000/success")
+                .setCancelUrl("http://localhost:3000/cancel")
 
-                // Redirect after cancellation
-                .setCancelUrl(
-                    "http://localhost:8080/cancel"
-                )
-
-                // Product information
                 .addLineItem(
                     SessionCreateParams.LineItem.builder()
 
                     .setQuantity(1L)
 
                     .setPriceData(
-                        SessionCreateParams.LineItem.PriceData
-                            .builder()
+                        SessionCreateParams.LineItem.PriceData.builder()
 
                         .setCurrency("inr")
 
-                        // ₹500 = 50000 paise
-                        .setUnitAmount(50000L)
+                        // Dynamic price
+                        .setUnitAmount(product.getPrice())
 
                         .setProductData(
                             SessionCreateParams.LineItem.PriceData
                                 .ProductData.builder()
-                                .setName("Laptop")
+
+                                // Dynamic product name
+                                .setName(product.getName())
+
                                 .build()
                         )
                         .build()
@@ -270,13 +275,11 @@ public class PaymentService {
                 )
                 .build();
 
-        // Creates Checkout Session through Stripe API
         Session session = stripeClient.v1()
                 .checkout()
                 .sessions()
                 .create(params);
 
-        // Returns Stripe Checkout URL
         return session.getUrl();
     }
 }

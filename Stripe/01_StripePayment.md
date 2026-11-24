@@ -1,15 +1,29 @@
-# Stripe Payment Integration for Spring Boot 
 
----
+# Stripe Payment Integration with Spring Boot
 
-## 1. What is Stripe?
+# 1. What is Stripe?
 
-Stripe is an online payment processing platform that allows applications to accept payments from customers.
-a way of transferring money
+**Stripe** is an online payment processing platform that allows applications to accept payments from customers.
 
-Example: A customer purchases a product worth ₹500. Stripe processes the payment by communicating with the payment networks and banks.
+In simple words, Stripe acts as a bridge between:
 
-Stripe handles:
+- Your application.
+- Your customer.
+- Banks and payment networks.
+
+### Example
+
+Suppose a customer purchases a mouse worth ₹500 from your e-commerce website.
+
+1. Customer selects the mouse.
+2. Customer clicks Pay Now.
+3. Your application sends payment information to Stripe.
+4. Stripe displays a secure payment page.
+5. Customer enters payment details.
+6. Stripe processes the payment.
+7. Stripe informs your backend about the payment result.
+
+### What does Stripe handle?
 
 - Payment processing.
 - Secure payment collection.
@@ -17,22 +31,30 @@ Stripe handles:
 - Payment status.
 - Payment-related events.
 
-In simple words: Stripe acts as a bridge between your application, customers and the payment system.
+**Remember:** We don't need to build our own payment processing system. Stripe provides the services and APIs to handle it.
 
-## 2. How Stripe Payment Works
+---
 
-<img width="1279" height="720" alt="Stripe_Payment_Workflow" src="https://github.com/user-attachments/assets/975135d9-7bb0-4a90-bd84-b8001f5cea3c" />
+# 2. How Stripe Payment Works
 
+First, understand the complete flow.
 
-1. Customer clicks Pay Now.
-2. Frontend calls Spring Boot backend.
-3. Backend creates a Checkout Session using Stripe.
-4. Stripe returns a Checkout URL.
-5. Frontend redirects customer to Stripe.
-6. Customer enters payment details and completes payment.
-7. Stripe processes the payment.
-8. Stripe sends a webhook to Spring Boot.
-9. Backend verifies the webhook and updates order status to `PAID`.
+### Complete payment flow
+
+1. Customer selects a product on the frontend.
+2. Customer clicks Pay Now.
+3. Frontend sends the selected product ID to the Spring Boot backend.
+4. Backend fetches the product details from the database.
+5. Backend creates a Checkout Session using Stripe.
+6. Stripe returns a Checkout URL to the backend.
+7. Backend sends that URL to the frontend.
+8. Frontend redirects the customer to Stripe.
+9. Customer enters payment details and completes payment.
+10. Stripe processes the payment.
+11. Stripe sends a webhook to Spring Boot.
+12. Backend verifies the webhook and updates the order status to `PAID`.
+
+### Flow diagram
 
 ```
 Customer
@@ -40,77 +62,128 @@ Customer
    v
 Frontend
    |
+   | Product ID
    v
-Spring Boot Backend
+PaymentController
    |
    v
-Stripe Checkout Session
+PaymentService
    |
+   | Fetch product details
+   v
+Database
+   |
+   | Product name and price
+   v
+PaymentService
+   |
+   | Create Checkout Session
+   v
+Stripe
+   |
+   | Checkout URL
+   v
+PaymentController
+   |
+   v
+Frontend
+   |
+   | Redirect
    v
 Stripe Payment Page
    |
    v
-Payment Processing
+Customer completes payment
    |
    v
 Stripe Webhook
    |
    v
-Spring Boot Backend
+StripeWebhookController
+   |
+   v
+Verify payment
    |
    v
 Database: Order = PAID
 ```
 
-## 3. Important Stripe Concepts
+**Important:** There are two directions of communication:
 
-### 3.1 API Keys
+- PaymentController → Your backend communicates with Stripe to create a payment session.
+- StripeWebhookController → Stripe communicates with your backend to inform it about payment events.
 
-Stripe provides two important API keys:
+---
+
+# 3. Important Stripe Concepts
+
+## 3.1 API Keys
+
+Stripe provides two important API keys.
 
 | Key                        | Usage    |
 | -------------------------- | -------- |
 | Publishable Key (`pk_...`) | Frontend |
 | Secret Key (`sk_...`)      | Backend  |
 
-- Publishable key identifies your Stripe account.
-- Secret key authenticates backend API requests.
-- Never expose the secret key or commit it to GitHub.
+**Publishable Key:**
 
-### 3.2 Checkout Session
+- Used on the frontend.
+- Identifies your Stripe account.
+- Designed to be publicly accessible.
 
-A Checkout Session represents one customer's checkout process.
+**Secret Key:**
 
-It contains:
+- Used on the backend.
+- Authenticates requests made to Stripe APIs.
+- Must never be exposed to the frontend.
+- Never commit it to GitHub.
+
+## 3.2 Checkout Session
+
+**Definition:** A Checkout Session represents one customer's checkout process.
+
+It contains information such as:
 
 - Product details.
-- Price and quantity.
+- Product price.
+- Quantity.
 - Currency.
 - Success URL.
 - Cancel URL.
 
-Stripe returns a Checkout URL where customers complete payment.
+When the backend creates a Checkout Session, Stripe returns a Checkout URL.
 
-### 3.3 PaymentIntent
+The customer opens this URL to complete the payment on Stripe's hosted payment page.
 
-PaymentIntent represents and manages the payment lifecycle.
+**Remember:** Checkout Session represents the complete checkout process, not just the payment amount.
+
+## 3.3 PaymentIntent
+
+**Definition:** PaymentIntent represents and manages the payment lifecycle.
+
+It helps Stripe track what is happening with a payment.
 
 Important statuses:
 
-| Status                    | Meaning                    |
-| ------------------------- | -------------------------- |
-| `requires_payment_method` | Payment method required    |
-| `requires_confirmation`   | Payment needs confirmation |
-| `requires_action`         | Additional action required |
-| `processing`              | Payment processing         |
-| `succeeded`               | Payment successful         |
-| `canceled`                | Payment cancelled          |
+| Status                    | Meaning                                |
+| ------------------------- | -------------------------------------- |
+| `requires_payment_method` | Payment method is required             |
+| `requires_confirmation`   | Payment needs confirmation             |
+| `requires_action`         | Additional customer action is required |
+| `processing`              | Payment is being processed             |
+| `succeeded`               | Payment successful                     |
+| `canceled`                | Payment cancelled                      |
 
-Relationship: When using Checkout Sessions in payment mode, Stripe manages the associated PaymentIntent automatically.
+**Relationship between Checkout Session and PaymentIntent:**
 
-### 3.4 PaymentMethod
+When we use Checkout Sessions in `PAYMENT` mode, Stripe manages the associated PaymentIntent automatically.
 
-Represents the payment method used by the customer.
+We generally don't need to create the PaymentIntent separately for this basic Checkout integration.
+
+## 3.4 PaymentMethod
+
+**Definition:** PaymentMethod represents the payment method used by the customer.
 
 Examples:
 
@@ -120,11 +193,15 @@ Examples:
 
 Stripe securely handles sensitive payment information.
 
-### 3.5 Webhook
+## 3.5 Webhook
 
-A webhook is an HTTP request sent by Stripe to your backend when a particular event occurs.
+**Definition:** A webhook is an HTTP request sent by Stripe to our backend when a particular event occurs.
 
-For example, after successful payment, Stripe sends an event to your application.
+Example:
+
+Suppose a customer successfully pays ₹500.
+
+Stripe sends a webhook notification to our Spring Boot application to inform it about the payment event.
 
 Important events:
 
@@ -136,17 +213,31 @@ Important events:
 | `payment_intent.succeeded`                 | Payment successful        |
 | `payment_intent.payment_failed`            | Payment failed            |
 
-Important: Webhooks are used to confirm payment and perform backend operations.
+**Why do we need webhooks?**
 
-### 3.6 Idempotency
+Because our backend needs a reliable way to know whether the payment actually succeeded.
 
-Idempotency prevents the same operation from being processed multiple times.
+We should not mark an order as paid just because the customer reaches the success URL.
 
-For example, Stripe may send the same webhook again if it doesn't receive a successful acknowledgment.
+## 3.6 Idempotency
 
-Store processed Stripe event IDs in your database to avoid duplicate processing.
+**Definition:** Idempotency means preventing the same operation from being processed multiple times.
 
-## 4. Types of Stripe Integration
+Example:
+
+Stripe may send the same webhook event again if it does not receive a successful response from our backend.
+
+If we process that event repeatedly, we might accidentally:
+
+- Update the order multiple times.
+- Send duplicate confirmation emails.
+- Deliver the same product multiple times.
+
+**Solution:** Store processed Stripe event IDs in the database and avoid processing the same event again.
+
+---
+
+# 4. Types of Stripe Integration
 
 | Integration       | Purpose                              |
 | ----------------- | ------------------------------------ |
@@ -158,11 +249,31 @@ Store processed Stripe event IDs in your database to avoid duplicate processing.
 
 For normal e-commerce applications, Checkout Sessions are a good starting point.
 
+---
+
 # 5. Spring Boot Implementation
 
-## Step 1. Add Dependency
+Now let's implement Stripe payment integration.
 
-Add Stripe Java SDK in `pom.xml`.
+We will use an example of an e-commerce application.
+
+Suppose our database contains:
+
+| Product ID | Product Name | Price   |
+| ---------- | ------------ | ------- |
+| 101        | Laptop       | ₹50,000 |
+| 102        | Mouse        | ₹500    |
+| 103        | Keyboard     | ₹1,500  |
+
+A customer can select any product.
+
+Our backend will fetch the selected product from the database and create a Checkout Session for that product.
+
+**Important:** We will not hardcode the product name or price in PaymentService.
+
+## Step 1. Add Stripe Dependency
+
+Add the Stripe Java SDK dependency to `pom.xml`.
 
 ```
 <dependency>
@@ -172,9 +283,11 @@ Add Stripe Java SDK in `pom.xml`.
 </dependency>
 ```
 
+This dependency allows our Spring Boot application to communicate with Stripe using Java classes and methods.
+
 ## Step 2. Configure API Keys
 
-`application.properties`
+Add the following properties to `application.properties`.
 
 ```
 stripe.secret-key=${STRIPE_SECRET_KEY}
@@ -182,11 +295,16 @@ stripe.secret-key=${STRIPE_SECRET_KEY}
 stripe.webhook-secret=${STRIPE_WEBHOOK_SECRET}
 ```
 
-Use environment variables instead of hardcoding secret keys.
+We use environment variables instead of directly writing secret keys in the properties file.
+
+- `STRIPE_SECRET_KEY` → Used to communicate with Stripe APIs.
+- `STRIPE_WEBHOOK_SECRET` → Used to verify webhook requests.
+
+Never expose these secrets publicly.
 
 ## Step 3. Create StripeConfig
 
-`config/StripeConfig.java`
+File: `config/StripeConfig.java`
 
 ```
 @Configuration
@@ -204,15 +322,193 @@ public class StripeConfig {
 }
 ```
 
-Why `@Bean`?
+### What is happening here?
 
-- Spring creates the `StripeClient` object.
+**1. `@Configuration`**
+
+Tells Spring Boot that this class contains configuration.
+
+**2. `@Value("${stripe.secret-key}")`**
+
+Reads the Stripe secret key from application properties.
+
+**3. `@Bean`**
+
+Tells Spring Boot to create and manage the returned object.
+
+**4. `StripeClient`**
+
+StripeClient is the object we use to communicate with Stripe APIs.
+
+### Why do we use @Bean?
+
+- Spring creates the StripeClient object.
 - Spring manages its lifecycle.
-- We can inject it wherever required.
+- We can inject it into other classes using constructor injection.
 
-## Step 4. Create PaymentService
+For example, we will inject StripeClient into PaymentService.
 
-`service/PaymentService.java`
+## Step 4. Create Product Entity
+
+File: `entity/Product.java`
+
+Before creating a Checkout Session, we need product information.
+
+Our product information will be stored in the database.
+
+```
+@Entity
+public class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    // Price stored in paise
+    private Long price;
+
+    // Getters and setters
+}
+```
+
+Example database records:
+
+| ID  | Name     | Price (Paise) |
+| --- | -------- | ------------- |
+| 101 | Laptop   | 5000000       |
+| 102 | Mouse    | 50000         |
+| 103 | Keyboard | 150000        |
+
+Why store the price in paise?
+
+Because Stripe expects the amount in the smallest currency unit for INR.
+
+Examples:
+
+```
+₹500   = 50000 paise
+₹100   = 10000 paise
+₹50    = 5000 paise
+₹50000 = 5000000 paise
+```
+
+## Step 5. Create ProductRepository
+
+File: `repository/ProductRepository.java`
+
+```
+public interface ProductRepository
+        extends JpaRepository<Product, Long> {
+}
+```
+
+### Why do we need ProductRepository?
+
+It helps us communicate with the product database.
+
+For example:
+
+```
+productRepository.findById(102L);
+```
+
+This searches for the product whose ID is 102.
+
+If the product exists, we get its details.
+
+If it doesn't exist, we can handle that situation.
+
+## Step 6. Create CheckoutRequest DTO
+
+File: `dto/CheckoutRequest.java`
+
+This is an important part of our implementation.
+
+Remember:
+
+The customer selects a product on the frontend.
+
+The frontend must tell the backend which product the customer selected.
+
+For this, we create a DTO.
+
+```
+public class CheckoutRequest {
+
+    private Long productId;
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
+}
+```
+
+### What is this DTO doing?
+
+Suppose the customer selects Mouse.
+
+The frontend sends:
+
+```
+{
+    "productId": 102
+}
+```
+
+Spring Boot converts this JSON into a CheckoutRequest object.
+
+Now we can retrieve the product ID using:
+
+```
+request.getProductId();
+```
+
+It returns:
+
+```
+102
+```
+
+**Important:** The frontend sends only the product ID. It does not decide the actual product price.
+
+Why?
+
+Because a user can manipulate frontend requests.
+
+For example, a user might try sending:
+
+```
+{
+    "productId": 102,
+    "price": 1
+}
+```
+
+If the backend trusts the frontend price, someone could purchase a ₹500 mouse for ₹1.
+
+Therefore:
+
+**Always fetch the actual product price from the backend database. Never trust the frontend price.**
+
+## Step 7. Create PaymentService
+
+File: `service/PaymentService.java`
+
+PaymentService contains the main payment creation logic.
+
+Its responsibilities are:
+
+1. Receive the selected product ID.
+2. Fetch the product from the database.
+3. Get the product name and price.
+4. Create Stripe Checkout Session.
+5. Return the Checkout URL.
 
 ```
 @Service
@@ -232,39 +528,50 @@ public class PaymentService {
     public String createCheckoutSession(Long productId)
             throws StripeException {
 
-        // Fetch selected product from database
+        // 1. Fetch selected product from database
         Product product = productRepository
                 .findById(productId)
                 .orElseThrow(() ->
                     new RuntimeException("Product not found")
                 );
 
+        // 2. Create Checkout Session parameters
         SessionCreateParams params =
                 SessionCreateParams.builder()
 
+                // One-time payment
                 .setMode(SessionCreateParams.Mode.PAYMENT)
 
-                .setSuccessUrl("http://localhost:3000/success")
-                .setCancelUrl("http://localhost:3000/cancel")
+                // Redirect after successful checkout
+                .setSuccessUrl(
+                    "http://localhost:3000/success"
+                )
 
+                // Redirect after cancellation
+                .setCancelUrl(
+                    "http://localhost:3000/cancel"
+                )
+
+                // Product information
                 .addLineItem(
                     SessionCreateParams.LineItem.builder()
 
                     .setQuantity(1L)
 
                     .setPriceData(
-                        SessionCreateParams.LineItem.PriceData.builder()
+                        SessionCreateParams.LineItem.PriceData
+                            .builder()
 
                         .setCurrency("inr")
 
-                        // Dynamic price
+                        // Dynamic price from database
                         .setUnitAmount(product.getPrice())
 
                         .setProductData(
                             SessionCreateParams.LineItem.PriceData
                                 .ProductData.builder()
 
-                                // Dynamic product name
+                                // Dynamic product name from database
                                 .setName(product.getName())
 
                                 .build()
@@ -275,40 +582,153 @@ public class PaymentService {
                 )
                 .build();
 
+        // 3. Create Checkout Session through Stripe API
         Session session = stripeClient.v1()
                 .checkout()
                 .sessions()
                 .create(params);
 
+        // 4. Return Stripe Checkout URL
         return session.getUrl();
     }
 }
 ```
 
-Important methods:
+### Understand the important parts
 
-| Method            | Purpose                                  |
-| ----------------- | ---------------------------------------- |
-| `setMode()`       | Defines payment type                     |
-| `setSuccessUrl()` | Successful checkout redirect             |
-| `setCancelUrl()`  | Cancelled checkout redirect              |
-| `setQuantity()`   | Product quantity                         |
-| `setCurrency()`   | Payment currency                         |
-| `setUnitAmount()` | Product amount in smallest currency unit |
-| `create()`        | Creates Checkout Session                 |
-| `getUrl()`        | Returns Stripe Checkout URL              |
-
-Currency conversion:
+**1. Constructor injection**
 
 ```
-₹500 = 50000 paise
-₹100 = 10000 paise
-₹50  = 5000 paise
+public PaymentService(
+        StripeClient stripeClient,
+        ProductRepository productRepository)
 ```
 
-## Step 5. Create PaymentController
+Spring Boot automatically provides both objects.
 
-`controller/PaymentController.java`
+- StripeClient communicates with Stripe.
+- ProductRepository communicates with our database.
+
+**2. Fetch product**
+
+```
+Product product = productRepository
+        .findById(productId)
+        .orElseThrow(() ->
+            new RuntimeException("Product not found")
+        );
+```
+
+Suppose productId is 102.
+
+The database returns:
+
+```
+ID: 102
+Name: Mouse
+Price: 50000 paise
+```
+
+**3. Set payment mode**
+
+```
+.setMode(SessionCreateParams.Mode.PAYMENT)
+```
+
+Defines that this is a one-time payment.
+
+**4. Set success URL**
+
+```
+.setSuccessUrl("http://localhost:3000/success")
+```
+
+After successful checkout, Stripe redirects the customer to this URL.
+
+**5. Set cancel URL**
+
+```
+.setCancelUrl("http://localhost:3000/cancel")
+```
+
+If the customer cancels checkout, Stripe redirects them to this URL.
+
+**6. Set quantity**
+
+```
+.setQuantity(1L)
+```
+
+The customer is purchasing one unit.
+
+Here quantity is fixed at 1 for simplicity. We can make it dynamic when implementing a shopping cart.
+
+**7. Set currency**
+
+```
+.setCurrency("inr")
+```
+
+Specifies Indian Rupees.
+
+**8. Set product price**
+
+```
+.setUnitAmount(product.getPrice())
+```
+
+This is dynamic.
+
+It gets the price from the database.
+
+**9. Set product name**
+
+```
+.setName(product.getName())
+```
+
+This also gets the product name from the database.
+
+**10. Create Checkout Session**
+
+```
+Session session = stripeClient.v1()
+        .checkout()
+        .sessions()
+        .create(params);
+```
+
+This sends the Checkout Session parameters to Stripe.
+
+Stripe creates the session and returns a Session object.
+
+**11. Get Checkout URL**
+
+```
+return session.getUrl();
+```
+
+Returns the URL where the customer can complete payment.
+
+### Important methods revision
+
+| Method            | Purpose                                       |
+| ----------------- | --------------------------------------------- |
+| `setMode()`       | Defines payment type                          |
+| `setSuccessUrl()` | Successful checkout redirect                  |
+| `setCancelUrl()`  | Cancelled checkout redirect                   |
+| `setQuantity()`   | Sets product quantity                         |
+| `setCurrency()`   | Sets payment currency                         |
+| `setUnitAmount()` | Sets product amount in smallest currency unit |
+| `setName()`       | Sets product name                             |
+| `create()`        | Creates Checkout Session                      |
+| `getUrl()`        | Returns Stripe Checkout URL                   |
+
+## Step 8. Create PaymentController
+
+File: `controller/PaymentController.java`
+
+Now we need a controller to receive requests from the frontend.
 
 ```
 @RestController
@@ -322,11 +742,14 @@ public class PaymentController {
     }
 
     @PostMapping("/checkout")
-    public Map<String, String> createCheckout()
+    public Map<String, String> createCheckout(
+            @RequestBody CheckoutRequest request)
             throws StripeException {
 
         String checkoutUrl =
-                paymentService.createCheckoutSession();
+                paymentService.createCheckoutSession(
+                        request.getProductId()
+                );
 
         // Sends Checkout URL to frontend
         return Map.of("url", checkoutUrl);
@@ -334,13 +757,90 @@ public class PaymentController {
 }
 ```
 
-API:
+### Understand this controller
+
+**1. `@RestController`**
+
+Tells Spring Boot that this class handles HTTP requests and returns response data.
+
+**2. `@RequestMapping("/api/payments")`**
+
+Defines the common URL for all endpoints inside this controller.
+
+**3. `@PostMapping("/checkout")`**
+
+Defines a POST endpoint.
+
+Complete API:
 
 ```
 POST /api/payments/checkout
 ```
 
-Response:
+**4. `@RequestBody CheckoutRequest request`**
+
+This is very important.
+
+It tells Spring Boot to:
+
+- Receive JSON data from the frontend.
+- Convert that JSON into a CheckoutRequest object.
+- Store the converted object in the `request` variable.
+
+**5. `request.getProductId()`**
+
+Gets the product ID sent by the frontend.
+
+**6. Call PaymentService**
+
+```
+paymentService.createCheckoutSession(
+    request.getProductId()
+);
+```
+
+Passes the selected product ID to PaymentService.
+
+**7. Return Checkout URL**
+
+```
+return Map.of("url", checkoutUrl);
+```
+
+Sends the Checkout URL back to the frontend in JSON format.
+
+### What exactly will the frontend send?
+
+Suppose the customer selects Mouse.
+
+Frontend sends this request:
+
+```
+POST /api/payments/checkout
+Content-Type: application/json
+```
+
+Request body:
+
+```
+{
+    "productId": 102
+}
+```
+
+### What happens next?
+
+1. `@RequestBody` receives the JSON.
+2. Spring Boot converts it into a CheckoutRequest object.
+3. `request.getProductId()` returns 102.
+4. Controller passes 102 to PaymentService.
+5. PaymentService fetches Mouse from the database.
+6. PaymentService gets its actual name and price.
+7. PaymentService creates a Checkout Session through Stripe.
+8. Stripe returns the Checkout URL.
+9. Controller sends that URL to the frontend.
+
+### What response will the frontend receive?
 
 ```
 {
@@ -348,17 +848,30 @@ Response:
 }
 ```
 
-## Step 6. Redirect Customer to Stripe
+The frontend can now use this URL to redirect the customer to Stripe.
 
-Frontend JavaScript:
+## Step 9. Redirect Customer to Stripe
+
+Now the frontend receives the Checkout URL.
+
+Example JavaScript:
 
 ```
-async function makePayment() {
+async function makePayment(selectedProductId) {
 
     const response = await fetch(
         "http://localhost:8080/api/payments/checkout",
         {
-            method: "POST"
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            // Sending selected product ID
+            body: JSON.stringify({
+                productId: selectedProductId
+            })
         }
     );
 
@@ -369,11 +882,45 @@ async function makePayment() {
 }
 ```
 
-The customer is now redirected to Stripe's hosted payment page.
+Suppose the user clicks Pay Now for Mouse.
 
-## Step 6 . Now you can run your application , go to checkout session url , fill data and check you are redirecting to success or failure
+The frontend calls:
 
-## Step 7. Success and Cancel Endpoints
+```
+makePayment(102);
+```
+
+The request body becomes:
+
+```
+{
+    "productId": 102
+}
+```
+
+The backend creates a Checkout Session for Mouse and returns its Checkout URL.
+
+Then:
+
+```
+window.location.href = data.url;
+```
+
+Redirects the customer to Stripe's hosted payment page.
+
+**Remember the responsibilities:**
+
+- Frontend → Sends the selected product ID.
+- Controller → Receives the request.
+- Service → Fetches product and creates Checkout Session.
+- Stripe → Provides the payment page.
+- Frontend → Redirects the customer to Stripe.
+
+## Step 10. Success and Cancel Endpoints
+
+Stripe redirects the customer according to the URLs we configured.
+
+Example:
 
 ```
 @GetMapping("/success")
@@ -387,183 +934,42 @@ public String cancel() {
 }
 ```
 
-Remember: Reaching the success URL does not prove that payment succeeded. Verify payment through the webhook.
+These endpoints can be handled by your frontend application or backend, depending on your application design.
 
-## Step 8. Implement Webhook
+**Important:** Reaching the success URL does not prove that payment succeeded.
 
-`controller/StripeWebhookController.java`
-
-```
-@RestController
-@RequestMapping("/api/payments")
-public class StripeWebhookController {
-
-    @Value("${stripe.webhook-secret}")
-    private String webhookSecret;
-
-    @PostMapping("/webhook")
-    public ResponseEntity<String> handleWebhook(
-
-            @RequestBody String payload,
-
-            @RequestHeader("Stripe-Signature")
-            String signature
-    ) {
-
-        Event event;
-
-        try {
-
-            // Verify Stripe webhook signature
-            event = Webhook.constructEvent(
-                    payload,
-                    signature,
-                    webhookSecret
-            );
-
-        } catch (SignatureVerificationException e) {
-
-            return ResponseEntity.badRequest()
-                    .body("Invalid signature");
-        }
-
-        // Check event type
-        if ("checkout.session.completed"
-                .equals(event.getType())) {
-
-            Session session = (Session) event
-                    .getDataObjectDeserializer()
-                    .getObject()
-                    .orElse(null);
-
-            if (session != null &&
-                    "paid".equals(session.getPaymentStatus())) {
-
-                // Payment successfully confirmed
-                System.out.println("Payment successful!");
-
-                // Update order status in database
-                // order.setStatus("PAID");
-            }
-        }
-
-        return ResponseEntity.ok("Webhook received");
-    }
-}
-```
-
-Important webhook methods:
-
-| Method                        | Purpose                    |
-| ----------------------------- | -------------------------- |
-| `constructEvent()`            | Verifies webhook signature |
-| `getType()`                   | Gets event type            |
-| `getDataObjectDeserializer()` | Retrieves event data       |
-| `getPaymentStatus()`          | Checks payment status      |
-
-Handle delayed payment success and failure events separately when using payment methods that support delayed confirmation.
+A customer might reach that URL without your backend having verified the payment.
+ 
+## Step 11 . Always verify the payment through the webhook. - NEXT PART 
 
 
-# 7. Database Integration (Real-world application)
+## Step 12. Implement Webhook
+# LEARNING TAKEAWAY
 
-In an actual e-commerce application, maintain order and payment information in the database.
+Stripe integration mainly involves three important things:
 
-Example Order Entity:
+**1. Create Checkout Session**
 
-```
-@Entity
-public class Order {
+Backend creates a Checkout Session using product information and Stripe returns a Checkout URL.
 
-    @Id
-    @GeneratedValue
-    private Long id;
+**2. Redirect to Stripe**
 
-    private BigDecimal amount;
+Frontend redirects the customer to Stripe's hosted payment page using the Checkout URL.
 
-    private String status;
+**3. Handle Webhook**
 
-    private String stripeSessionId;
-}
-```
-
-Order status lifecycle:
-
-```
-PENDING
-   |
-   v
-Payment Processing
-   |
-   v
-PAID / FAILED
-```
-
-When payment succeeds, update the corresponding order to `PAID`.
-
-Important: Store the Stripe Session ID to connect the order with its payment.
-
-### Important production rules
-
-1. Calculate product prices on the backend, never trust frontend amounts.
-2. Verify webhook signatures.
-3. Store Stripe event IDs to prevent duplicate processing.
-4. Never mark orders paid based only on success URL.
-5. Use `BigDecimal` or integer minor units for monetary calculations, not `Double`.
-6. Never store raw card numbers or CVC.
-7. Use HTTPS in production.
-8. Use appropriate idempotency keys for payment creation.
-9. Handle Stripe API failures and webhook retries.
-10. Make order fulfillment safe against duplicate events.
-
-# 8. Important Interview Questions
-
-| Question                  | Answer                                       |
-| ------------------------- | -------------------------------------------- |
-| What is Stripe?           | Payment processing platform                  |
-| What is Checkout Session? | Represents customer's checkout process       |
-| What is PaymentIntent?    | Manages payment lifecycle                    |
-| What is PaymentMethod?    | Represents customer's payment method         |
-| What is Webhook?          | Event notification sent by Stripe to backend |
-| Why use StripeClient?     | To communicate with Stripe APIs              |
-| Why use a webhook?        | To reliably process payment events           |
-| What is Idempotency?      | Prevents duplicate processing                |
-| What is Success URL?      | Redirects customer after checkout            |
-| What is Webhook Secret?   | Verifies webhook authenticity                |
-
-## 9. Final Revision – Complete Flow
-
-1. Customer clicks Pay Now.
-2. Frontend calls PaymentController.
-3. PaymentService creates Checkout Session.
-4. Stripe returns Checkout URL.
-5. Frontend redirects customer to Stripe.
-6. Customer completes payment.
-7. Stripe sends webhook event.
-8. Webhook controller verifies signature.
-9. Backend checks payment status.
-10. Database order status becomes `PAID`.
-
-Most important distinction to remember:
-
-- `PaymentController` → Your application communicates with Stripe.
-- `StripeWebhookController` → Stripe communicates with your application.
-- `PaymentService` → Contains payment creation logic.
-- `StripeConfig` → Creates and configures StripeClient.
-
-## 10. Official Documentation
-
-- [Stripe Checkout Quickstart](https://docs.stripe.com/checkout/quickstart?utm_source=chatgpt.com)
-- [Checkout Session API](https://docs.stripe.com/api/checkout/sessions/create?utm_source=chatgpt.com)
-- [Stripe Webhooks](https://docs.stripe.com/webhooks?utm_source=chatgpt.com)
-- [Stripe Testing](https://docs.stripe.com/testing?utm_source=chatgpt.com)
-- [Stripe Java SDK](https://github.com/stripe/stripe-java?utm_source=chatgpt.com)
-
-LEARNING TAKEAWAY
-
-Stripe integration mainly involves three things:
-
-1. Create Checkout Session – Initiate payment.
-2. Redirect to Stripe – Customer completes payment.
-3. Handle Webhook – Confirm payment and update database.
+Stripe informs our backend about payment events. Backend verifies the event and updates the order status.
 
 These three concepts form the foundation of Stripe payment integration in Spring Boot.
+
+**The most important thing to remember about dynamic checkout:**
+
+Frontend sends the product ID → Backend fetches product details → Backend creates Stripe Checkout Session → Frontend redirects the customer to Stripe.
+
+## **A few things to remember while practising**
+
+1. The code is a learning implementation. A production application should also create and save a `PENDING` order before creating the Checkout Session.
+2. The webhook should update that existing order, using its stored Stripe Session ID.
+3. Handle webhook retries and duplicate events safely.
+4. The example uses quantity `1`. A shopping cart with multiple products will require multiple line items.
+5. The success and cancel URLs should point to actual frontend routes in your application.
